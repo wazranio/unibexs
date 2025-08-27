@@ -14,7 +14,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar,
   CheckCircle,
   XCircle,
   Clock,
@@ -22,9 +21,7 @@ import {
   Users,
   GraduationCap,
   TrendingUp,
-  AlertTriangle,
   Edit,
-  Trash2,
   UserCheck,
   UserX,
   Shield,
@@ -590,7 +587,7 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partner }) => {
                   <div className="text-center py-8">
                     <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                     <h3 className="text-sm font-medium text-gray-300">No Applications</h3>
-                    <p className="text-sm text-gray-400">This partner hasn't submitted any applications yet.</p>
+                    <p className="text-sm text-gray-400">This partner hasn&apos;t submitted any applications yet.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -645,7 +642,7 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partner }) => {
                   <div className="text-center py-8">
                     <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                     <h3 className="text-sm font-medium text-gray-300">No Students</h3>
-                    <p className="text-sm text-gray-400">This partner hasn't brought any students yet.</p>
+                    <p className="text-sm text-gray-400">This partner hasn&apos;t brought any students yet.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

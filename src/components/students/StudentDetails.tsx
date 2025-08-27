@@ -12,28 +12,20 @@ import {
   User,
   Mail,
   Phone,
-  MapPin,
   Calendar,
   CheckCircle,
   XCircle,
   Clock,
   FileText,
   GraduationCap,
-  TrendingUp,
   Globe,
   Edit,
   Download,
-  Eye,
   Award,
   Users,
   IdCard,
-  CreditCard,
   Home,
-  AlertCircle,
-  BookOpen,
   Languages,
-  Plane,
-  Building,
   Star,
 } from 'lucide-react';
 
@@ -42,7 +34,6 @@ interface StudentDetailsProps {
 }
 
 const StudentDetails: React.FC<StudentDetailsProps> = ({ student }) => {
-  const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
@@ -436,7 +427,7 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({ student }) => {
                       <div className="text-center py-8">
                         <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                         <h3 className="text-sm font-medium text-gray-300">No Applications</h3>
-                        <p className="text-sm text-gray-400">This student hasn't submitted any applications yet.</p>
+                        <p className="text-sm text-gray-400">This student hasn&apos;t submitted any applications yet.</p>
                       </div>
                     ) : (
                       <div className="space-y-4">
