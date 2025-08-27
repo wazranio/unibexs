@@ -30,10 +30,12 @@ const PartnerStudentsPage: React.FC = () => {
   useEffect(() => {
     if (!user || isAdmin) return;
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isAdmin]);
 
   useEffect(() => {
     filterStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [students, searchQuery, selectedNationality]);
 
   const loadData = () => {

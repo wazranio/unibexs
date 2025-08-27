@@ -349,7 +349,7 @@ const ApplicationDetailsV2: React.FC<ApplicationDetailsV2Props> = ({
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-slate-600 mb-1">Date of Birth</label>
-                            <p className="text-slate-800">{new Date(student.dateOfBirth).toLocaleDateString()}</p>
+                            <p className="text-slate-800">{student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : 'Not provided'}</p>
                           </div>
                         </div>
                       </div>

@@ -8,21 +8,15 @@ import Sidebar from '@/components/layout/Sidebar';
 import {
   Search,
   Download,
-  Eye,
   Edit,
   Trash2,
   Plus,
   Building2,
-  GraduationCap,
   BookOpen,
-  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
-  Users,
-  Home,
   ChevronRight as ChevronRightIcon,
   School,
-  Save,
   X,
 } from 'lucide-react';
 
@@ -74,6 +68,7 @@ const UniversitiesPage: React.FC = () => {
 
   useEffect(() => {
     filterData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, currentView, selectedUniversity, selectedCollege, universities, colleges, programs]);
 
   const loadData = () => {
@@ -146,7 +141,7 @@ const UniversitiesPage: React.FC = () => {
   };
 
   const navigateToLevel = (levelIndex: number) => {
-    const targetLevel = navigationPath[levelIndex];
+    // const targetLevel = navigationPath[levelIndex];
     
     if (levelIndex === 0) {
       setCurrentView('universities');

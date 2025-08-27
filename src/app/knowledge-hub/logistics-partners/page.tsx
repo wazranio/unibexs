@@ -12,7 +12,6 @@ import {
   Phone,
   Mail,
   Building2,
-  Users,
   Eye,
 } from 'lucide-react';
 

@@ -11,11 +11,8 @@ import {
   MapPin,
   Phone,
   Mail,
-  Building2,
-  Users,
   Eye,
   Star,
-  Clock,
   CheckCircle,
 } from 'lucide-react';
 
@@ -36,6 +33,7 @@ const PartnerLogisticsPartnersPage: React.FC = () => {
 
   useEffect(() => {
     filterPartners();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logisticsPartners, searchQuery, selectedCountry, selectedService]);
 
   const loadData = () => {

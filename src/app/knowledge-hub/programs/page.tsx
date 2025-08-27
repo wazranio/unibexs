@@ -81,7 +81,7 @@ function ProgramTableRow({ program, university, college, onView }: ProgramTableR
 }
 
 export default function ProgramsPage() {
-  const { user, isAdmin } = useAuth();
+  const { /* user, */ isAdmin } = useAuth();
   const [programs, setPrograms] = useState<Program[]>([]);
   const [universities, setUniversities] = useState<University[]>([]);
   const [colleges, setColleges] = useState<College[]>([]);
@@ -109,7 +109,8 @@ export default function ProgramsPage() {
 
   useEffect(() => {
     filterPrograms();
-  }, [programs, searchQuery, selectedUniversity, selectedCountry]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [programs, searchQuery, selectedUniversity, selectedCountry, universities, colleges]);
 
   const loadData = () => {
     try {

@@ -192,7 +192,7 @@ export function initializeSampleUniversities() {
   console.log('🏫 Initializing sample universities and programs...');
   
   const existingUniversities = StorageService.getUniversities();
-  const existingPrograms = StorageService.getPrograms();
+  // const existingPrograms = StorageService.getPrograms();
   
   if (existingUniversities.length === 0) {
     // Add universities

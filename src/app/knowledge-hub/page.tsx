@@ -16,7 +16,6 @@ import {
   Eye,
   ChevronRight,
   Users,
-  Building2,
 } from 'lucide-react';
 
 type TabType = 'programs' | 'guides' | 'tips' | 'success';
@@ -83,7 +82,8 @@ const KnowledgeHubPage: React.FC = () => {
     }
 
     setFilteredPrograms(filtered);
-  }, [programs, programSearchQuery, selectedUniversity]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [programs, programSearchQuery, selectedUniversity, universities]);
 
 
   const loadData = () => {
@@ -136,7 +136,7 @@ const KnowledgeHubPage: React.FC = () => {
         style: 'currency',
         currency: currency,
       }).format(amount);
-    } catch (error) {
+    } catch {
       // Fallback for invalid currency codes
       return `${currency} ${amount.toLocaleString()}`;
     }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Student, Application } from '@/types';
+import { Student } from '@/types';
 import { StorageService } from '@/lib/data/storage';
 import { AuthService } from '@/lib/auth';
 import Sidebar from '@/components/layout/Sidebar';
@@ -21,7 +21,7 @@ import {
 
 const StudentsPage: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
+  // const [applications, setApplications] = useState<Application[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,9 +41,9 @@ const StudentsPage: React.FC = () => {
     const loadData = () => {
       try {
         const studentsData = StorageService.getStudents();
-        const applicationsData = StorageService.getApplications();
+        // const applicationsData = StorageService.getApplications();
         setStudents(studentsData);
-        setApplications(applicationsData);
+        // setApplications(applicationsData);
       } catch (error) {
         console.error('Error loading students:', error);
       } finally {
@@ -155,9 +155,9 @@ const StudentsPage: React.FC = () => {
     });
   };
 
-  const getStudentApplications = (studentId: string) => {
-    return applications.filter(app => app.studentId === studentId);
-  };
+  // const getStudentApplications = (studentId: string) => {
+  //   return applications.filter(app => app.studentId === studentId);
+  // };
 
   const getApplicationCountBadge = (count: number) => {
     if (count === 0) return 'bg-gray-900 text-gray-300 border-gray-700';

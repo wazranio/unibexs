@@ -92,7 +92,7 @@ function ServiceTableRow({ service, onView }: ServiceTableRowProps) {
 }
 
 export default function ServicesPage() {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const [services, setServices] = useState<ServiceProvider[]>([]);
   const [analytics, setAnalytics] = useState<ServiceAnalytics>({
     total: 0,

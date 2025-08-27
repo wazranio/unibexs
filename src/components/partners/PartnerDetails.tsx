@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Partner, Application, Student } from '@/types';
 import { StorageService } from '@/lib/data/storage';
 import { AuthService } from '@/lib/auth';
@@ -38,7 +37,6 @@ interface PartnerDetailsProps {
 }
 
 const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partner }) => {
-  const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,22 +112,16 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partner }) => {
 
   const handleApprovePartner = () => {
     // Update partner status to approved
-    const partners = StorageService.getPartners();
-    const updatedPartners = partners.map(p => 
-      p.id === partner.id ? { ...p, status: 'approved' as const } : p
-    );
-    StorageService.savePartners(updatedPartners);
-    router.refresh();
+    const updatedPartner = { ...partner, status: 'approved' as const };
+    StorageService.savePartner(updatedPartner);
+    window.location.reload(); // Refresh the page
   };
 
   const handleRejectPartner = () => {
     // Update partner status to rejected
-    const partners = StorageService.getPartners();
-    const updatedPartners = partners.map(p => 
-      p.id === partner.id ? { ...p, status: 'rejected' as const } : p
-    );
-    StorageService.savePartners(updatedPartners);
-    router.refresh();
+    const updatedPartner = { ...partner, status: 'rejected' as const };
+    StorageService.savePartner(updatedPartner);
+    window.location.reload(); // Refresh the page
   };
 
   return (

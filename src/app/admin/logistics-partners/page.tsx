@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LogisticsPartner } from '@/types';
 import { StorageService } from '@/lib/data/storage';
 import { AuthService } from '@/lib/auth';
@@ -15,12 +15,10 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
-  Users,
   X,
   MapPin,
   Phone,
   Mail,
-  Building2,
 } from 'lucide-react';
 
 const LogisticsPartnersPage: React.FC = () => {
@@ -36,7 +34,7 @@ const LogisticsPartnersPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [selectedPartners, setSelectedPartners] = useState<string[]>([]);
+  // const [selectedPartners, setSelectedPartners] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPartner, setEditingPartner] = useState<LogisticsPartner | null>(null);
@@ -74,14 +72,6 @@ const LogisticsPartnersPage: React.FC = () => {
     'Emergency assistance',
   ];
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    filterData();
-  }, [logisticsPartners, searchQuery, filters, sortBy, sortOrder]);
-
   const loadData = () => {
     try {
       const partnersData = StorageService.getLogisticsPartners();
@@ -93,7 +83,7 @@ const LogisticsPartnersPage: React.FC = () => {
     }
   };
 
-  const filterData = () => {
+  const filterData = useCallback(() => {
     let filtered = [...logisticsPartners];
 
     // Apply search
@@ -147,7 +137,15 @@ const LogisticsPartnersPage: React.FC = () => {
     });
 
     setFilteredPartners(filtered);
-  };
+  }, [logisticsPartners, searchQuery, filters, sortBy, sortOrder]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    filterData();
+  }, [filterData]);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));

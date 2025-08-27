@@ -19,7 +19,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
-  Settings,
   Trash2,
 } from 'lucide-react';
 

@@ -685,7 +685,7 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                          <p className="text-sm text-gray-900">{formatDate(student.dateOfBirth)}</p>
+                          <p className="text-sm text-gray-900">{student.dateOfBirth ? formatDate(student.dateOfBirth) : 'Not provided'}</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
@@ -787,15 +787,15 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
                       <div className="space-y-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                          <p className="text-sm text-gray-900">{student.emergencyContact.name}</p>
+                          <p className="text-sm text-gray-900">{student.emergencyContact?.name || 'Not provided'}</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
-                          <p className="text-sm text-gray-900">{student.emergencyContact.relationship}</p>
+                          <p className="text-sm text-gray-900">{student.emergencyContact?.relationship || 'Not provided'}</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                          <p className="text-sm text-gray-900">{student.emergencyContact.phone}</p>
+                          <p className="text-sm text-gray-900">{student.emergencyContact?.phone || 'Not provided'}</p>
                         </div>
                       </div>
                     </div>
