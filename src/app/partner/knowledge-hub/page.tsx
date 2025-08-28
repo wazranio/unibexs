@@ -3,493 +3,44 @@
 import React, { useState, useEffect } from 'react';
 import { EnhancedProgram, University, College, Level, FieldOfStudy } from '@/types';
 import { StorageService } from '@/lib/data/storage';
-import { InheritanceManager } from '@/lib/utils/inheritance-manager';
 import Sidebar from '@/components/layout/Sidebar';
 import { useAuth } from '@/lib/auth';
 import {
   Search,
-  Filter,
   BookOpen,
   Clock,
   DollarSign,
   Calendar,
   Award,
-  MapPin,
   Star,
   ExternalLink,
   ChevronDown,
-  ChevronUp,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  FileText,
+  HelpCircle,
+  Calculator,
+  Download,
+  Users,
+  Building,
+  GraduationCap,
+  Globe
 } from 'lucide-react';
 
-interface ProgramAnalyticsCardProps {
-  title: string;
-  value: number;
-  color: string;
-  icon: string;
-  subtitle?: string;
-}
+type TabType = 'programs' | 'resources' | 'qa' | 'commission';
 
-function ProgramAnalyticsCard({ title, value, color, icon, subtitle }: ProgramAnalyticsCardProps) {
-  return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-      <div className="flex items-center">
-        <div className={`${color} p-3 rounded-lg mr-4`}>
-          <span className="text-2xl">{icon}</span>
-        </div>
-        <div>
-          <p className="text-gray-300 text-sm">{title}</p>
-          <p className="text-2xl font-bold text-white">{value.toLocaleString()}</p>
-          {subtitle && <p className="text-gray-400 text-xs">{subtitle}</p>}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface SmartSearchBarProps {
-  query: string;
-  onQueryChange: (query: string) => void;
-  onSearch: () => void;
-  popularSearches: string[];
-}
-
-function SmartSearchBar({ query, onQueryChange, onSearch, popularSearches }: SmartSearchBarProps) {
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
-  return (
-    <div className="relative">
-      <div className="relative">
-        <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="What does your student want to study? (e.g., cybersecurity, business, medicine)"
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          onFocus={() => setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-          onKeyPress={(e) => e.key === 'Enter' && onSearch()}
-          className="w-full pl-12 pr-4 py-4 text-lg border border-gray-600 rounded-xl bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-lg"
-        />
-        <button
-          onClick={onSearch}
-          className="absolute right-3 top-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Search
-        </button>
-      </div>
-      
-      {showSuggestions && popularSearches.length > 0 && (
-        <div className="absolute z-10 w-full mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-xl">
-          <div className="p-3 border-b border-gray-700">
-            <p className="text-sm text-gray-400 font-medium">Popular Searches</p>
-          </div>
-          <div className="p-2">
-            {popularSearches.map((search, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  onQueryChange(search);
-                  setShowSuggestions(false);
-                  onSearch();
-                }}
-                className="w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <span className="text-blue-400 mr-2">🔍</span>
-                {search}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface FilterSidebarProps {
-  filters: any;
-  onFiltersChange: (filters: any) => void;
-  fieldsOfStudy: FieldOfStudy[];
-  universities: University[];
-  countries: string[];
-  resultCount: number;
-}
-
-function FilterSidebar({ filters, onFiltersChange, fieldsOfStudy, universities, countries, resultCount }: FilterSidebarProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
-  
-  const clearFilters = () => {
-    onFiltersChange({
-      fieldOfStudyIds: [],
-      levelNames: [],
-      universityIds: [],
-      countries: [],
-      intakes: [],
-      minFees: '',
-      maxFees: ''
-    });
-  };
-
-  const hasActiveFilters = () => {
-    return filters.fieldOfStudyIds.length > 0 || 
-           filters.levelNames.length > 0 || 
-           filters.universityIds.length > 0 ||
-           filters.countries.length > 0 ||
-           filters.intakes.length > 0 ||
-           filters.minFees || 
-           filters.maxFees;
-  };
-
-  return (
-    <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
-      <div className="p-4 border-b border-gray-700">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <Filter className="w-5 h-5 mr-2" />
-            Filters
-          </h3>
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-          </button>
-        </div>
-        <div className="flex items-center justify-between mt-2">
-          <p className="text-sm text-gray-400">{resultCount} programs found</p>
-          {hasActiveFilters() && (
-            <button
-              onClick={clearFilters}
-              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              Clear all
-            </button>
-          )}
-        </div>
-      </div>
-
-      {isExpanded && (
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* Field of Study */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">Field of Study</label>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {fieldsOfStudy.map((field) => (
-                <label key={field.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={filters.fieldOfStudyIds.includes(field.id)}
-                    onChange={(e) => {
-                      const newIds = e.target.checked
-                        ? [...filters.fieldOfStudyIds, field.id]
-                        : filters.fieldOfStudyIds.filter((id: string) => id !== field.id);
-                      onFiltersChange({ ...filters, fieldOfStudyIds: newIds });
-                    }}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-sm text-gray-300 flex items-center">
-                    <span className="mr-2">{field.icon}</span>
-                    {field.name}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Level */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">Academic Level</label>
-            <div className="space-y-2">
-              {['Foundation', 'Bachelor', 'Master', 'PhD'].map((level) => (
-                <label key={level} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={filters.levelNames.includes(level)}
-                    onChange={(e) => {
-                      const newLevels = e.target.checked
-                        ? [...filters.levelNames, level]
-                        : filters.levelNames.filter((l: string) => l !== level);
-                      onFiltersChange({ ...filters, levelNames: newLevels });
-                    }}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-sm text-gray-300">{level}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Universities */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">University</label>
-            <div className="space-y-2 max-h-32 overflow-y-auto">
-              {universities.map((university) => (
-                <label key={university.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={filters.universityIds.includes(university.id)}
-                    onChange={(e) => {
-                      const newIds = e.target.checked
-                        ? [...filters.universityIds, university.id]
-                        : filters.universityIds.filter((id: string) => id !== university.id);
-                      onFiltersChange({ ...filters, universityIds: newIds });
-                    }}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-sm text-gray-300">{university.name}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Countries */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">Country</label>
-            <div className="space-y-2">
-              {countries.map((country) => (
-                <label key={country} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={filters.countries.includes(country)}
-                    onChange={(e) => {
-                      const newCountries = e.target.checked
-                        ? [...filters.countries, country]
-                        : filters.countries.filter((c: string) => c !== country);
-                      onFiltersChange({ ...filters, countries: newCountries });
-                    }}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-sm text-gray-300">{country}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Intakes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">Intake Period</label>
-            <div className="space-y-2">
-              {['January', 'February', 'March', 'April', 'May', 'July', 'August', 'September', 'October', 'November'].map((intake) => (
-                <label key={intake} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={filters.intakes.includes(intake)}
-                    onChange={(e) => {
-                      const newIntakes = e.target.checked
-                        ? [...filters.intakes, intake]
-                        : filters.intakes.filter((i: string) => i !== intake);
-                      onFiltersChange({ ...filters, intakes: newIntakes });
-                    }}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-sm text-gray-300">{intake}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Tuition Fee Range */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">Annual Tuition Fee (MYR)</label>
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="number"
-                placeholder="Min"
-                value={filters.minFees}
-                onChange={(e) => onFiltersChange({ ...filters, minFees: e.target.value })}
-                className="px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                type="number"
-                placeholder="Max"
-                value={filters.maxFees}
-                onChange={(e) => onFiltersChange({ ...filters, maxFees: e.target.value })}
-                className="px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface ProgramCardProps {
-  program: EnhancedProgram;
-  university: University;
-  college?: College;
-  level: Level;
-  fieldOfStudy: FieldOfStudy;
-  onViewDetails: (program: EnhancedProgram) => void;
-  onQuickApply: (program: EnhancedProgram) => void;
-}
-
-function ProgramCard({ program, university, college, level, fieldOfStudy, onViewDetails, onQuickApply }: ProgramCardProps) {
-  const effectiveValues = InheritanceManager.getEffectiveValues(program);
-  
-  return (
-    <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 hover:border-blue-500 transition-all duration-200 hover:shadow-lg">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center">
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mr-4">
-            <BookOpen className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-1">{program.name}</h3>
-            <div className="flex items-center text-gray-400 text-sm">
-              <MapPin className="w-4 h-4 mr-1" />
-              <span>{university.name}</span>
-              {college && <span className="mx-1">•</span>}
-              {college && <span>{college.name}</span>}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center">
-          <span className="text-lg mr-2">{fieldOfStudy.icon}</span>
-          <span className="text-xs px-2 py-1 bg-blue-900 text-blue-300 rounded-full font-medium">
-            {fieldOfStudy.name}
-          </span>
-        </div>
-      </div>
-
-      {/* Description */}
-      {program.shortDescription && (
-        <p className="text-gray-300 text-sm mb-4">{program.shortDescription}</p>
-      )}
-
-      {/* Highlights */}
-      {program.highlights && program.highlights.length > 0 && (
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-2">
-            {program.highlights.slice(0, 3).map((highlight, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center px-2 py-1 bg-green-900 text-green-300 text-xs rounded-full border border-green-700"
-              >
-                <Star className="w-3 h-3 mr-1" />
-                {highlight}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Key Information Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="flex items-center">
-          <Clock className="w-4 h-4 text-gray-400 mr-2" />
-          <div>
-            <p className="text-gray-400 text-xs">Duration</p>
-            <p className="text-white text-sm font-medium">{effectiveValues.duration}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center">
-          <DollarSign className="w-4 h-4 text-gray-400 mr-2" />
-          <div>
-            <p className="text-gray-400 text-xs">Annual Fee</p>
-            <p className="text-white text-sm font-medium">
-              {program.currency} {program.fees.toLocaleString()}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center">
-          <Award className="w-4 h-4 text-gray-400 mr-2" />
-          <div>
-            <p className="text-gray-400 text-xs">Level</p>
-            <p className="text-white text-sm font-medium">{level.displayName}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center">
-          <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-          <div>
-            <p className="text-gray-400 text-xs">Next Intake</p>
-            <p className="text-white text-sm font-medium">
-              {program.intakes.length > 0 ? program.intakes[0] : 'TBA'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Intakes */}
-      {program.intakes.length > 0 && (
-        <div className="mb-4">
-          <p className="text-gray-400 text-xs mb-2">Available Intakes</p>
-          <div className="flex flex-wrap gap-1">
-            {program.intakes.map((intake, index) => (
-              <span
-                key={index}
-                className="px-2 py-1 bg-blue-900 text-blue-300 text-xs rounded-md border border-blue-700"
-              >
-                {intake}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* English Requirements */}
-      {effectiveValues.englishRequirements && (
-        <div className="mb-4 p-3 bg-gray-700 rounded-lg">
-          <p className="text-gray-400 text-xs mb-1">English Requirements</p>
-          <div className="flex items-center space-x-4 text-sm">
-            {effectiveValues.englishRequirements.ielts && (
-              <span className="text-white">
-                IELTS: <strong>{effectiveValues.englishRequirements.ielts}</strong>
-              </span>
-            )}
-            {effectiveValues.englishRequirements.toefl && (
-              <span className="text-white">
-                TOEFL: <strong>{effectiveValues.englishRequirements.toefl}</strong>
-              </span>
-            )}
-            {effectiveValues.englishRequirements.pte && (
-              <span className="text-white">
-                PTE: <strong>{effectiveValues.englishRequirements.pte}</strong>
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex space-x-3">
-        <button
-          onClick={() => onViewDetails(program)}
-          className="flex-1 flex items-center justify-center px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
-        >
-          <ExternalLink className="w-4 h-4 mr-2" />
-          View Details
-        </button>
-        <button
-          onClick={() => onQuickApply(program)}
-          className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Sparkles className="w-4 h-4 mr-2" />
-          Quick Apply
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export default function PartnerKnowledgeHubPage() {
-  const { isAdmin } = useAuth();
-  
-  // State
+const PartnerKnowledgeHub: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<TabType>('programs');
   const [programs, setPrograms] = useState<EnhancedProgram[]>([]);
   const [universities, setUniversities] = useState<University[]>([]);
   const [colleges, setColleges] = useState<College[]>([]);
   const [levels, setLevels] = useState<Level[]>([]);
   const [fieldsOfStudy, setFieldsOfStudy] = useState<FieldOfStudy[]>([]);
-  const [filteredPrograms, setFilteredPrograms] = useState<EnhancedProgram[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
+  // Program discovery state
+  const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     fieldOfStudyIds: [] as string[],
     levelNames: [] as string[],
@@ -499,97 +50,678 @@ export default function PartnerKnowledgeHubPage() {
     minFees: '',
     maxFees: ''
   });
-
-  // Popular searches for suggestions
-  const popularSearches = [
-    'cybersecurity',
-    'business administration',
-    'computer science',
-    'medicine',
-    'engineering',
-    'marketing',
-    'data science',
-    'artificial intelligence'
-  ];
-
-  // Analytics
-  const analytics = {
-    totalPrograms: programs.filter(p => p.isActive).length,
-    universities: new Set(programs.filter(p => p.isActive).map(p => p.universityId)).size,
-    countries: new Set(universities.map(u => u.country)).size,
-    avgFees: programs.filter(p => p.isActive).length > 0 
-      ? Math.round(programs.filter(p => p.isActive).reduce((sum, p) => sum + p.fees, 0) / programs.filter(p => p.isActive).length) 
-      : 0
-  };
-
-  const countries = Array.from(new Set(universities.map(u => u.country))).sort();
+  const [filteredPrograms, setFilteredPrograms] = useState<EnhancedProgram[]>([]);
 
   useEffect(() => {
     loadData();
   }, []);
 
   useEffect(() => {
-    filterPrograms();
-    // eslint-disable-next-line react-hooks/exhaustive-deps  
-  }, [programs, searchQuery, filters]);
+    if (activeTab === 'programs') {
+      filterPrograms();
+    }
+  }, [programs, searchQuery, filters, activeTab]);
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
       const programsData = StorageService.getEnhancedPrograms({ isActive: true });
       const universitiesData = StorageService.getUniversities();
       const collegesData = StorageService.getColleges();
       const levelsData = StorageService.getLevels();
       const fieldsData = StorageService.getFieldsOfStudy();
-      
+
       setPrograms(programsData);
       setUniversities(universitiesData);
       setColleges(collegesData);
       setLevels(levelsData);
       setFieldsOfStudy(fieldsData);
     } catch (error) {
-      console.error('Error loading programs data:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const filterPrograms = () => {
-    const searchFilters = {
-      fieldOfStudyIds: filters.fieldOfStudyIds.length > 0 ? filters.fieldOfStudyIds : undefined,
-      levelIds: filters.levelNames.length > 0 
-        ? levels.filter(l => filters.levelNames.includes(l.name)).map(l => l.id)
-        : undefined,
-      universityIds: filters.universityIds.length > 0 ? filters.universityIds : undefined,
-      countries: filters.countries.length > 0 ? filters.countries : undefined,
-      intakes: filters.intakes.length > 0 ? filters.intakes : undefined,
-      minFees: filters.minFees ? parseFloat(filters.minFees) : undefined,
-      maxFees: filters.maxFees ? parseFloat(filters.maxFees) : undefined,
-    };
+    let filtered = [...programs];
 
-    const filtered = StorageService.searchEnhancedPrograms(searchQuery, searchFilters);
+    // Apply search query
+    if (searchQuery) {
+      filtered = StorageService.searchEnhancedPrograms(searchQuery, {
+        fieldOfStudyIds: filters.fieldOfStudyIds,
+        universityIds: filters.universityIds,
+        minFees: filters.minFees ? parseFloat(filters.minFees) : undefined,
+        maxFees: filters.maxFees ? parseFloat(filters.maxFees) : undefined,
+      });
+    }
+
     setFilteredPrograms(filtered);
   };
 
-  const handleSearch = () => {
-    filterPrograms();
-  };
+  const tabs = [
+    { id: 'programs' as TabType, name: 'Programs', icon: GraduationCap, count: programs.length },
+    { id: 'resources' as TabType, name: 'Resources', icon: FileText, count: 24 },
+    { id: 'qa' as TabType, name: 'Q&A', icon: HelpCircle, count: 47 },
+    { id: 'commission' as TabType, name: 'Commission', icon: DollarSign, count: null }
+  ];
 
-  const handleViewDetails = (program: EnhancedProgram) => {
-    // Navigate to program details page
-    console.log('View details for:', program.name);
-  };
+  const renderProgramsTab = () => (
+    <div className="flex flex-col min-h-full">
+      {/* Search and Filters */}
+      <div className="bg-gray-800 border-b border-gray-700 p-6">
+        <div className="space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Search for programs, universities, or fields of study..."
+            />
+          </div>
 
-  const handleQuickApply = (program: EnhancedProgram) => {
-    // Open quick application modal
-    console.log('Quick apply for:', program.name);
-  };
+          {/* Filters Row */}
+          <div className="flex flex-wrap gap-3 items-center justify-between">
+            <div className="flex flex-wrap gap-3">
+              {/* Field of Study Filter */}
+              <div className="relative">
+                <select 
+                  onChange={(e) => {
+                    const fieldId = e.target.value;
+                    if (fieldId && !filters.fieldOfStudyIds.includes(fieldId)) {
+                      setFilters({
+                        ...filters,
+                        fieldOfStudyIds: [...filters.fieldOfStudyIds, fieldId]
+                      });
+                    }
+                    e.target.value = '';
+                  }}
+                  className="appearance-none bg-gray-700 border border-gray-600 text-white px-3 py-2 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Field of Study</option>
+                  {fieldsOfStudy.filter(f => !filters.fieldOfStudyIds.includes(f.id)).map((field) => (
+                    <option key={field.id} value={field.id}>{field.name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              {/* University Filter */}
+              <div className="relative">
+                <select 
+                  onChange={(e) => {
+                    const uniId = e.target.value;
+                    if (uniId && !filters.universityIds.includes(uniId)) {
+                      setFilters({
+                        ...filters,
+                        universityIds: [...filters.universityIds, uniId]
+                      });
+                    }
+                    e.target.value = '';
+                  }}
+                  className="appearance-none bg-gray-700 border border-gray-600 text-white px-3 py-2 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">University</option>
+                  {universities.filter(u => !filters.universityIds.includes(u.id)).map((university) => (
+                    <option key={university.id} value={university.id}>{university.name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              {/* Fee Range Inputs */}
+              <input
+                type="number"
+                value={filters.minFees}
+                onChange={(e) => setFilters({ ...filters, minFees: e.target.value })}
+                className="w-24 bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Min Fee"
+              />
+              <input
+                type="number"
+                value={filters.maxFees}
+                onChange={(e) => setFilters({ ...filters, maxFees: e.target.value })}
+                className="w-24 bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Max Fee"
+              />
+            </div>
+
+            {/* Results Counter */}
+            <div className="text-sm text-gray-400">
+              <span className="text-white font-medium">{filteredPrograms.length}</span> programs found
+            </div>
+          </div>
+
+          {/* Active Filter Pills */}
+          {(filters.fieldOfStudyIds.length > 0 || filters.universityIds.length > 0 || filters.minFees || filters.maxFees) && (
+            <div className="flex items-center gap-2 pt-3 border-t border-gray-700">
+              <span className="text-xs text-gray-500 font-medium">Active filters:</span>
+              
+              {/* Field Pills */}
+              {filters.fieldOfStudyIds.map((fieldId) => {
+                const field = fieldsOfStudy.find(f => f.id === fieldId);
+                return (
+                  <span
+                    key={fieldId}
+                    className="inline-flex items-center px-2 py-1 bg-blue-600 text-white text-xs rounded-full"
+                  >
+                    {field?.name}
+                    <button
+                      onClick={() => setFilters({
+                        ...filters,
+                        fieldOfStudyIds: filters.fieldOfStudyIds.filter(id => id !== fieldId)
+                      })}
+                      className="ml-1 hover:text-gray-300 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </span>
+                );
+              })}
+
+              {/* University Pills */}
+              {filters.universityIds.map((uniId) => {
+                const university = universities.find(u => u.id === uniId);
+                return (
+                  <span
+                    key={uniId}
+                    className="inline-flex items-center px-2 py-1 bg-blue-600 text-white text-xs rounded-full"
+                  >
+                    {university?.name}
+                    <button
+                      onClick={() => setFilters({
+                        ...filters,
+                        universityIds: filters.universityIds.filter(id => id !== uniId)
+                      })}
+                      className="ml-1 hover:text-gray-300 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </span>
+                );
+              })}
+
+              {/* Fee Range Pill */}
+              {(filters.minFees || filters.maxFees) && (
+                <span className="inline-flex items-center px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
+                  ${filters.minFees || '0'} - ${filters.maxFees || '∞'}
+                  <button
+                    onClick={() => setFilters({ ...filters, minFees: '', maxFees: '' })}
+                    className="ml-1 hover:text-gray-300 transition-colors"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+
+              {/* Clear All */}
+              <button
+                onClick={() => setFilters({
+                  fieldOfStudyIds: [],
+                  levelNames: [],
+                  universityIds: [],
+                  countries: [],
+                  intakes: [],
+                  minFees: '',
+                  maxFees: ''
+                })}
+                className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors hover:underline"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex flex-col bg-gray-900">
+        {/* Stats Cards */}
+        <div className="p-6 border-b border-gray-700">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
+              <div className="flex items-center">
+                <GraduationCap className="w-6 h-6 text-blue-400 mr-3" />
+                <div>
+                  <p className="text-gray-400 text-sm">Total Programs</p>
+                  <p className="text-white text-xl font-bold">{programs.length}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
+              <div className="flex items-center">
+                <Building className="w-6 h-6 text-green-400 mr-3" />
+                <div>
+                  <p className="text-gray-400 text-sm">Universities</p>
+                  <p className="text-white text-xl font-bold">{universities.length}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
+              <div className="flex items-center">
+                <Globe className="w-6 h-6 text-purple-400 mr-3" />
+                <div>
+                  <p className="text-gray-400 text-sm">Countries</p>
+                  <p className="text-white text-xl font-bold">{new Set(universities.map(u => u.country)).size}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
+              <div className="flex items-center">
+                <Star className="w-6 h-6 text-yellow-400 mr-3" />
+                <div>
+                  <p className="text-gray-400 text-sm">Fields of Study</p>
+                  <p className="text-white text-xl font-bold">{fieldsOfStudy.length}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Programs List */}
+        <div className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredPrograms.map((program) => {
+              const university = universities.find(u => u.id === program.universityId);
+              const college = colleges.find(c => c.id === program.collegeId);
+              const field = fieldsOfStudy.find(f => f.id === program.fieldOfStudyId);
+              const level = levels.find(l => l.id === program.levelId);
+              
+              return (
+                <div key={program.id} className="bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-gray-600 transition-colors">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start">
+                      <span className="text-2xl mr-3">{field?.icon}</span>
+                      <div>
+                        <h3 className="text-white font-semibold text-lg">{program.name}</h3>
+                        <p className="text-gray-400 text-sm">{university?.name}</p>
+                        <p className="text-gray-500 text-xs">{college?.name}</p>
+                      </div>
+                    </div>
+                    <span className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-medium">{level?.name}</span>
+                  </div>
+                  
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-2">{program.shortDescription}</p>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center text-gray-400">
+                        <Clock className="w-4 h-4 mr-2" />
+                        <span>Duration</span>
+                      </div>
+                      <span className="text-white font-medium">{program.duration}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center text-gray-400">
+                        <DollarSign className="w-4 h-4 mr-2" />
+                        <span>Fees</span>
+                      </div>
+                      <span className="text-white font-medium">{program.currency} {program.fees?.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  
+                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+                    View Details
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+
+  const renderResourcesTab = () => (
+    <div className="p-6 bg-gray-900 min-h-full">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-white mb-2">Resource Materials</h2>
+        <p className="text-gray-400">Everything you need to guide your students successfully</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          { title: 'University Guides', desc: 'Comprehensive guides for each university with detailed information about courses, facilities, and admission requirements', icon: Building, count: 24, iconColor: 'text-blue-400' },
+          { title: 'Application Process', desc: 'Step-by-step application procedures and document requirements for different countries', icon: FileText, count: 18, iconColor: 'text-green-400' },
+          { title: 'Visa Guidelines', desc: 'Country-specific visa requirements, processing times, and application procedures', icon: Globe, count: 12, iconColor: 'text-purple-400' },
+          { title: 'Student Support', desc: 'Pre-departure briefings, accommodation guides, and student support resources', icon: Users, count: 15, iconColor: 'text-orange-400' },
+          { title: 'Commission Guides', desc: 'Detailed commission structures, payment processes, and calculation methods', icon: DollarSign, count: 8, iconColor: 'text-yellow-400' },
+          { title: 'Marketing Materials', desc: 'Brochures, presentations, and promotional materials for student recruitment', icon: Download, count: 32, iconColor: 'text-pink-400' }
+        ].map((resource, idx) => (
+          <div key={idx} className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-colors cursor-pointer">
+            <div className="flex items-center mb-4">
+              <resource.icon className={`w-6 h-6 ${resource.iconColor} mr-3`} />
+              <div>
+                <h3 className="text-white font-semibold text-lg">{resource.title}</h3>
+                <span className="text-gray-400 text-sm">{resource.count} resources</span>
+              </div>
+            </div>
+            <p className="text-gray-300 text-sm mb-4 leading-relaxed">{resource.desc}</p>
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+              View All
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Featured Resources */}
+      <div className="mt-8">
+        <h3 className="text-xl font-bold text-white mb-4">Featured Resources</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-colors">
+            <div className="flex items-center mb-4">
+              <Sparkles className="w-6 h-6 text-blue-400 mr-3" />
+              <div>
+                <h4 className="text-white font-semibold">Quick Start Guide</h4>
+                <p className="text-gray-400 text-sm">Get started with UniBexs platform</p>
+              </div>
+            </div>
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
+            </button>
+          </div>
+
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-colors">
+            <div className="flex items-center mb-4">
+              <TrendingUp className="w-6 h-6 text-green-400 mr-3" />
+              <div>
+                <h4 className="text-white font-semibold">Success Stories</h4>
+                <p className="text-gray-400 text-sm">Learn from successful student placements</p>
+              </div>
+            </div>
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
+              <ExternalLink className="w-4 h-4 mr-2" />
+              View Case Studies
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderQATab = () => (
+    <div className="p-6 bg-gray-900 min-h-full">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-white mb-2">Q&A Section</h2>
+        <p className="text-gray-400">Find answers to frequently asked questions</p>
+      </div>
+
+      <div className="mb-6">
+        <div className="relative max-w-xl">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Search questions and answers..."
+          />
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2">
+          {['All', 'Applications', 'Visa', 'Commission', 'Universities', 'Documents'].map((category, idx) => (
+            <button
+              key={idx}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                idx === 0 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        {[
+          { 
+            q: 'What documents are required for UK university applications?', 
+            a: 'UK university applications typically require: Academic transcripts and certificates, English proficiency test scores (IELTS/TOEFL), Personal statement, Two academic references, Passport copy, and Financial proof. Some courses may require additional documents like portfolios or work experience certificates.', 
+            category: 'Applications',
+            helpful: 142,
+            updated: '2 days ago'
+          },
+          { 
+            q: 'How long does visa processing take for Malaysia?', 
+            a: 'Malaysian student visa (eVAL) processing typically takes 2-4 weeks from the date of submission. However, this can vary based on the university, completeness of documents, and current processing volumes. We recommend applying at least 6-8 weeks before your intended travel date.', 
+            category: 'Visa',
+            helpful: 98,
+            updated: '1 week ago'
+          },
+          { 
+            q: 'What are the commission rates for engineering programs?', 
+            a: 'Engineering programs typically offer commission rates between 15-20% depending on the university and program level. Bachelor programs usually offer 15-18%, while Master programs can offer up to 20%. PhD programs may have different structures. Check the specific program details for exact rates.', 
+            category: 'Commission',
+            helpful: 76,
+            updated: '3 days ago'
+          },
+          { 
+            q: 'Can students apply for multiple programs simultaneously?', 
+            a: 'Yes, students can apply for multiple programs through our platform. We recommend applying to 3-5 programs to maximize chances of acceptance. Each application is processed independently, and students can choose their preferred offer once acceptances are received.', 
+            category: 'Applications',
+            helpful: 134,
+            updated: '5 days ago'
+          },
+          { 
+            q: 'What support is available for visa interview preparation?', 
+            a: 'We provide comprehensive visa interview preparation including: Mock interview sessions, Common question practice, Document preparation guidance, Tips for successful interviews, and Country-specific requirements briefing. Contact your assigned counselor to schedule a prep session.', 
+            category: 'Visa',
+            helpful: 89,
+            updated: '1 week ago'
+          }
+        ].map((item, idx) => (
+          <div key={idx} className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-colors">
+            <div className="flex items-start justify-between mb-4">
+              <h3 className="text-white font-semibold text-lg pr-4">{item.q}</h3>
+              <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded font-medium whitespace-nowrap">
+                {item.category}
+              </span>
+            </div>
+            <p className="text-gray-300 text-sm leading-relaxed mb-4">{item.a}</p>
+            
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center text-gray-400">
+                  <span className="mr-1">👍</span>
+                  <span>{item.helpful} helpful</span>
+                </div>
+                <div className="text-gray-500">
+                  Updated {item.updated}
+                </div>
+              </div>
+              <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors">
+                View Full Answer
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Ask Question CTA */}
+      <div className="mt-8">
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
+          <HelpCircle className="w-8 h-8 text-blue-400 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">Can&apos;t find your answer?</h3>
+          <p className="text-gray-400 mb-4">Ask our expert team and get personalized assistance</p>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg transition-colors">
+            Ask a Question
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCommissionTab = () => (
+    <div className="p-6 bg-gray-900 min-h-full">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-white mb-2">Commission Structure</h2>
+        <p className="text-gray-400">Understand your earning potential and commission rates</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Commission Calculator */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          <div className="flex items-center mb-6">
+            <Calculator className="w-6 h-6 text-blue-400 mr-3" />
+            <div>
+              <h3 className="text-white font-semibold text-lg">Commission Calculator</h3>
+              <p className="text-gray-400 text-sm">Calculate your potential earnings</p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Program Fees (USD)</label>
+              <input
+                type="number"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter program fees"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Commission Rate (%)</label>
+              <input
+                type="number"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="15"
+              />
+            </div>
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+              Calculate Commission
+            </button>
+          </div>
+        </div>
+
+        {/* Commission Structure */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          <div className="flex items-center mb-6">
+            <DollarSign className="w-6 h-6 text-green-400 mr-3" />
+            <div>
+              <h3 className="text-white font-semibold text-lg">Rate Structure</h3>
+              <p className="text-gray-400 text-sm">Commission rates by program level</p>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            {[
+              { level: 'Foundation', rate: '12-15%', description: 'Pre-university programs' },
+              { level: 'Bachelor', rate: '15-18%', description: 'Undergraduate degrees' },
+              { level: 'Master', rate: '18-22%', description: 'Postgraduate programs' },
+              { level: 'PhD', rate: '20-25%', description: 'Doctoral programs' }
+            ].map((item, idx) => (
+              <div key={idx} className="bg-gray-700 rounded-lg p-4 border border-gray-600 hover:border-gray-500 transition-colors">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-white font-medium">{item.level}</span>
+                  <span className="text-white font-bold text-lg">{item.rate}</span>
+                </div>
+                <p className="text-gray-400 text-sm">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Earning Potential */}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-white mb-4">Your Earning Potential</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
+            <TrendingUp className="w-6 h-6 text-purple-400 mx-auto mb-3" />
+            <h4 className="text-white font-semibold mb-2">Monthly Average</h4>
+            <p className="text-white text-2xl font-bold mb-1">$2,400</p>
+            <p className="text-gray-400 text-sm">Based on 8 applications</p>
+          </div>
+
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
+            <Star className="w-6 h-6 text-orange-400 mx-auto mb-3" />
+            <h4 className="text-white font-semibold mb-2">Top Performers</h4>
+            <p className="text-white text-2xl font-bold mb-1">$8,500</p>
+            <p className="text-gray-400 text-sm">Per month average</p>
+          </div>
+
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
+            <Award className="w-6 h-6 text-green-400 mx-auto mb-3" />
+            <h4 className="text-white font-semibold mb-2">Bonus Eligible</h4>
+            <p className="text-white text-2xl font-bold mb-1">+25%</p>
+            <p className="text-gray-400 text-sm">For 15+ applications</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Information */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          <div className="flex items-center mb-6">
+            <Calendar className="w-6 h-6 text-blue-400 mr-3" />
+            <div>
+              <h3 className="text-white font-semibold text-lg">Payment Schedule</h3>
+              <p className="text-gray-400 text-sm">When you get paid</p>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between py-2 border-b border-gray-700">
+              <span className="text-gray-300">Application Submission</span>
+              <span className="text-white font-medium">30% advance</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-gray-700">
+              <span className="text-gray-300">Visa Approval</span>
+              <span className="text-white font-medium">50% payment</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-gray-300">Student Arrival</span>
+              <span className="text-white font-medium">20% final payment</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          <div className="flex items-center mb-6">
+            <Download className="w-6 h-6 text-green-400 mr-3" />
+            <div>
+              <h3 className="text-white font-semibold text-lg">Resources</h3>
+              <p className="text-gray-400 text-sm">Download helpful materials</p>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <button className="w-full flex items-center justify-between bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition-colors text-left">
+              <div>
+                <p className="text-white font-medium">Commission Guide 2024</p>
+                <p className="text-gray-400 text-sm">Complete commission handbook</p>
+              </div>
+              <Download className="w-4 h-4 text-green-400" />
+            </button>
+            
+            <button className="w-full flex items-center justify-between bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition-colors text-left">
+              <div>
+                <p className="text-white font-medium">Payment Terms</p>
+                <p className="text-gray-400 text-sm">Detailed payment conditions</p>
+              </div>
+              <Download className="w-4 h-4 text-green-400" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
       <div className="flex h-screen bg-gray-900">
-        <Sidebar isAdmin={isAdmin} />
+        <Sidebar isAdmin={false} />
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <div className="text-white">Loading...</div>
         </div>
       </div>
     );
@@ -597,116 +729,65 @@ export default function PartnerKnowledgeHubPage() {
 
   return (
     <div className="flex h-screen bg-gray-900">
-      <Sidebar isAdmin={isAdmin} />
-      <div className="flex-1 flex">
-        <FilterSidebar
-          filters={filters}
-          onFiltersChange={setFilters}
-          fieldsOfStudy={fieldsOfStudy}
-          universities={universities}
-          countries={countries}
-          resultCount={filteredPrograms.length}
-        />
-        
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header */}
-          <header className="bg-gray-800 shadow-sm border-b border-gray-700 p-6">
-            <div className="max-w-6xl mx-auto">
-              <h1 className="text-3xl font-bold text-white mb-2">Program Discovery Hub</h1>
-              <p className="text-gray-300 mb-6">Find the perfect academic program for your students</p>
-              
-              <SmartSearchBar
-                query={searchQuery}
-                onQueryChange={setSearchQuery}
-                onSearch={handleSearch}
-                popularSearches={popularSearches}
-              />
-            </div>
-          </header>
-
-          {/* Analytics */}
-          <div className="p-6 border-b border-gray-700">
-            <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <ProgramAnalyticsCard
-                  title="Available Programs"
-                  value={analytics.totalPrograms}
-                  color="bg-purple-500"
-                  icon="📚"
-                />
-                <ProgramAnalyticsCard
-                  title="Universities"
-                  value={analytics.universities}
-                  color="bg-blue-500"
-                  icon="🏛️"
-                />
-                <ProgramAnalyticsCard
-                  title="Countries"
-                  value={analytics.countries}
-                  color="bg-green-500"
-                  icon="🌍"
-                />
-                <ProgramAnalyticsCard
-                  title="Avg Fee (MYR)"
-                  value={analytics.avgFees}
-                  color="bg-orange-500"
-                  icon="💰"
-                  subtitle="per year"
-                />
+      <Sidebar isAdmin={false} />
+      
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="bg-gray-800 border-b border-gray-700 px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center mb-2">
+                <BookOpen className="w-6 h-6 text-blue-400 mr-3" />
+                <h1 className="text-2xl font-bold text-white">Knowledge Hub</h1>
               </div>
+              <p className="text-gray-400 text-sm">Your comprehensive resource center for student success</p>
+            </div>
+            <div className="text-right">
+              <p className="text-gray-400 text-sm">Welcome back,</p>
+              <p className="text-white font-medium">{user?.name}</p>
             </div>
           </div>
+        </div>
 
-          {/* Results */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-6xl mx-auto">
-              {filteredPrograms.length === 0 ? (
-                <div className="text-center py-12">
-                  <BookOpen className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-medium text-gray-400 mb-2">No programs found</h3>
-                  <p className="text-gray-500">Try adjusting your search terms or filters</p>
-                </div>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-white">
-                      {filteredPrograms.length} Program{filteredPrograms.length !== 1 ? 's' : ''} Found
-                    </h2>
-                    <div className="flex items-center space-x-2 text-gray-400 text-sm">
-                      <TrendingUp className="w-4 h-4" />
-                      <span>Sorted by relevance</span>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {filteredPrograms.map((program) => {
-                      const university = universities.find(u => u.id === program.universityId);
-                      const college = colleges.find(c => c.id === program.collegeId);
-                      const level = levels.find(l => l.id === program.levelId);
-                      const fieldOfStudy = fieldsOfStudy.find(f => f.id === program.fieldOfStudyId);
-                      
-                      if (!university || !level || !fieldOfStudy) return null;
-                      
-                      return (
-                        <ProgramCard
-                          key={program.id}
-                          program={program}
-                          university={university}
-                          college={college}
-                          level={level}
-                          fieldOfStudy={fieldOfStudy}
-                          onViewDetails={handleViewDetails}
-                          onQuickApply={handleQuickApply}
-                        />
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
+        {/* Tab Navigation */}
+        <div className="bg-gray-800 border-b border-gray-700 px-8">
+          <nav className="flex space-x-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 py-3 px-4 text-sm font-medium transition-colors rounded-lg ${
+                  activeTab === tab.id
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                <span>{tab.name}</span>
+                {tab.count !== null && (
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    activeTab === tab.id 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-600 text-gray-300'
+                  }`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Tab Content */}
+        <div className="flex-1 overflow-y-auto">
+          {activeTab === 'programs' && renderProgramsTab()}
+          {activeTab === 'resources' && renderResourcesTab()}
+          {activeTab === 'qa' && renderQATab()}
+          {activeTab === 'commission' && renderCommissionTab()}
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default PartnerKnowledgeHub;

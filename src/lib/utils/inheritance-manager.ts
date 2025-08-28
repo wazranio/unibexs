@@ -18,18 +18,27 @@ export class InheritanceManager {
 
     const appliedProgram: EnhancedProgram = { ...program };
 
+    // Ensure inheritsFromLevel exists with default values
+    if (!appliedProgram.inheritsFromLevel) {
+      appliedProgram.inheritsFromLevel = {
+        duration: true,
+        commission: true,
+        englishRequirements: true
+      };
+    }
+
     // Apply duration inheritance
-    if (program.inheritsFromLevel.duration && level.defaultDuration) {
+    if (appliedProgram.inheritsFromLevel.duration && level.defaultDuration) {
       appliedProgram.duration = level.defaultDuration;
     }
 
     // Apply commission rate inheritance
-    if (program.inheritsFromLevel.commission && level.defaultCommissionRate !== undefined) {
+    if (appliedProgram.inheritsFromLevel.commission && level.defaultCommissionRate !== undefined) {
       appliedProgram.commissionRate = level.defaultCommissionRate;
     }
 
     // Apply English requirements inheritance
-    if (program.inheritsFromLevel.englishRequirements && level.defaultEnglishRequirements) {
+    if (appliedProgram.inheritsFromLevel.englishRequirements && level.defaultEnglishRequirements) {
       appliedProgram.englishRequirements = level.defaultEnglishRequirements;
     }
 
@@ -48,7 +57,7 @@ export class InheritanceManager {
     const applied = this.applyLevelDefaults(program, level);
 
     return {
-      duration: applied.duration,
+      duration: applied.duration || 'Not specified',
       commissionRate: applied.commissionRate,
       englishRequirements: applied.englishRequirements,
     };
@@ -103,20 +112,27 @@ export class InheritanceManager {
       let needsUpdate = false;
       const programUpdates: Partial<EnhancedProgram> = {};
 
+      // Ensure inheritsFromLevel exists with default values
+      const inheritance = program.inheritsFromLevel || {
+        duration: true,
+        commission: true,
+        englishRequirements: true
+      };
+
       // Check if program inherits duration and level default changed
-      if (program.inheritsFromLevel.duration && updates.defaultDuration !== undefined) {
+      if (inheritance.duration && updates.defaultDuration !== undefined) {
         programUpdates.duration = updates.defaultDuration;
         needsUpdate = true;
       }
 
       // Check if program inherits commission and level default changed
-      if (program.inheritsFromLevel.commission && updates.defaultCommissionRate !== undefined) {
+      if (inheritance.commission && updates.defaultCommissionRate !== undefined) {
         programUpdates.commissionRate = updates.defaultCommissionRate;
         needsUpdate = true;
       }
 
       // Check if program inherits English requirements and level default changed
-      if (program.inheritsFromLevel.englishRequirements && updates.defaultEnglishRequirements !== undefined) {
+      if (inheritance.englishRequirements && updates.defaultEnglishRequirements !== undefined) {
         programUpdates.englishRequirements = updates.defaultEnglishRequirements;
         needsUpdate = true;
       }
@@ -192,13 +208,20 @@ export class InheritanceManager {
     const programs = StorageService.getEnhancedPrograms({ levelId });
     
     return programs.filter(program => {
+      // Ensure inheritsFromLevel exists with default values
+      const inheritance = program.inheritsFromLevel || {
+        duration: true,
+        commission: true,
+        englishRequirements: true
+      };
+
       switch (property) {
         case 'defaultDuration':
-          return program.inheritsFromLevel.duration;
+          return inheritance.duration;
         case 'defaultCommissionRate':
-          return program.inheritsFromLevel.commission;
+          return inheritance.commission;
         case 'defaultEnglishRequirements':
-          return program.inheritsFromLevel.englishRequirements;
+          return inheritance.englishRequirements;
         default:
           return false;
       }
@@ -252,10 +275,17 @@ export class InheritanceManager {
    * Check if a program has any overrides (non-inherited values)
    */
   static hasOverrides(program: EnhancedProgram): boolean {
+    // Ensure inheritsFromLevel exists with default values
+    const inheritance = program.inheritsFromLevel || {
+      duration: true,
+      commission: true,
+      englishRequirements: true
+    };
+
     return (
-      !program.inheritsFromLevel.duration ||
-      !program.inheritsFromLevel.commission ||
-      !program.inheritsFromLevel.englishRequirements
+      !inheritance.duration ||
+      !inheritance.commission ||
+      !inheritance.englishRequirements
     );
   }
 
@@ -269,18 +299,25 @@ export class InheritanceManager {
   } {
     const level = StorageService.getLevel(program.levelId);
     
+    // Ensure inheritsFromLevel exists with default values
+    const inheritance = program.inheritsFromLevel || {
+      duration: true,
+      commission: true,
+      englishRequirements: true
+    };
+    
     return {
       duration: {
-        inherited: program.inheritsFromLevel.duration,
-        hasOverride: !program.inheritsFromLevel.duration && !!level?.defaultDuration
+        inherited: inheritance.duration,
+        hasOverride: !inheritance.duration && !!level?.defaultDuration
       },
       commission: {
-        inherited: program.inheritsFromLevel.commission,
-        hasOverride: !program.inheritsFromLevel.commission && level?.defaultCommissionRate !== undefined
+        inherited: inheritance.commission,
+        hasOverride: !inheritance.commission && level?.defaultCommissionRate !== undefined
       },
       englishRequirements: {
-        inherited: program.inheritsFromLevel.englishRequirements,
-        hasOverride: !program.inheritsFromLevel.englishRequirements && !!level?.defaultEnglishRequirements
+        inherited: inheritance.englishRequirements,
+        hasOverride: !inheritance.englishRequirements && !!level?.defaultEnglishRequirements
       }
     };
   }

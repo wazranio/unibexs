@@ -445,6 +445,7 @@ export interface EnhancedProgram extends Program {
   // Display enhancements
   shortDescription?: string;
   highlights?: string[]; // Key selling points
+  programUrl?: string; // Official program URL for partners to get more information
   
   // Inheritance flags
   inheritsFromLevel: {

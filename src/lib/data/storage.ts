@@ -719,9 +719,30 @@ export class StorageService {
   }): EnhancedProgram[] {
     const programs = this.getItem<EnhancedProgram>(STORAGE_KEYS.ENHANCED_PROGRAMS);
     
-    if (!filters) return programs;
+    // Ensure all programs have inheritsFromLevel property (migration)
+    const migratedPrograms = programs.map(program => {
+      if (!program.inheritsFromLevel) {
+        return {
+          ...program,
+          inheritsFromLevel: {
+            duration: true,
+            commission: true,
+            englishRequirements: true
+          },
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return program;
+    });
+
+    // Save migrated data if there were changes
+    if (migratedPrograms.some((prog, index) => !programs[index]?.inheritsFromLevel)) {
+      this.setItem(STORAGE_KEYS.ENHANCED_PROGRAMS, migratedPrograms);
+    }
     
-    return programs.filter(program => {
+    if (!filters) return migratedPrograms;
+    
+    return migratedPrograms.filter(program => {
       if (filters.universityId && program.universityId !== filters.universityId) return false;
       if (filters.collegeId && program.collegeId !== filters.collegeId) return false;
       if (filters.levelId && program.levelId !== filters.levelId) return false;

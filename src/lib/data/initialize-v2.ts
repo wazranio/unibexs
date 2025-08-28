@@ -7,6 +7,7 @@ import { initializeSampleUniversities } from './sample-universities';
 import { initializeSampleServices } from './sample-services';
 import { initializeSampleLogisticsPartners } from './sample-logistics-partners';
 import { initializeEnhancedProgramData } from './enhanced-program-data';
+import { UniversityDataInitializer } from './initialize-universities';
 
 function initializeSampleCommissions(): void {
   console.log('📊 Initializing sample commission data...');
@@ -562,6 +563,11 @@ export async function initializeDataV2(): Promise<void> {
 
     // Initialize enhanced program management data
     initializeEnhancedProgramData();
+    
+    // Initialize comprehensive university hierarchical data
+    if (!UniversityDataInitializer.isUniversityDataInitialized()) {
+      UniversityDataInitializer.initializeUniversityData();
+    }
 
     // Initialize service providers
     initializeSampleServices();

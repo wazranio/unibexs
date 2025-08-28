@@ -55,11 +55,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
       icon: Building,
     },
     {
-      name: 'Programs',
-      href: '/admin/programs',
-      icon: BookOpen,
-    },
-    {
       name: 'Logistics Partners',
       href: '/admin/logistics-partners',
       icon: Truck,
