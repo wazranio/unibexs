@@ -15,35 +15,35 @@ function initializeSampleCommissions(): void {
     const applications = StorageService.getApplications();
     const commissions: Commission[] = [];
     
-    // Create a completed commission (student enrolled and paid)
-    const completedApp = applications.find(app => app.id === 'app-003');
-    if (completedApp) {
-      const completedCommission = createCommissionFromApplication(completedApp, new Date(Date.now() - 5 * 24 * 60 * 60 * 1000));
-      completedCommission.status = 'commission_paid';
-      completedCommission.approvedAt = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-      completedCommission.releasedAt = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-      completedCommission.paidAt = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
-      completedCommission.transferReference = 'TXN20241201001';
-      completedCommission.transferDocumentUrl = 'https://example.com/transfers/receipt-001.pdf';
-      completedCommission.approvedBy = 'admin@unibexs.com';
-      completedCommission.releasedBy = 'admin@unibexs.com';
-      commissions.push(completedCommission);
+    // Create a commission paid (Omar Hassan - APP-2024-004)
+    const paidApp = applications.find(app => app.id === 'APP-2024-004');
+    if (paidApp) {
+      const paidCommission = createCommissionFromApplication(paidApp, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+      paidCommission.status = 'commission_paid';
+      paidCommission.approvedAt = new Date(Date.now() - 20 * 24 * 60 * 60 * 1000);
+      paidCommission.releasedAt = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+      paidCommission.paidAt = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+      paidCommission.transferReference = 'TXN20241201001';
+      paidCommission.transferDocumentUrl = 'https://example.com/transfers/receipt-001.pdf';
+      paidCommission.approvedBy = 'admin@unibexs.com';
+      paidCommission.releasedBy = 'admin@unibexs.com';
+      commissions.push(paidCommission);
     }
     
-    // Create a pending commission
-    const pendingApp = applications.find(app => app.id === 'app-001');
+    // Create a pending commission (Ahmed Ali - APP-2024-002)
+    const pendingApp = applications.find(app => app.id === 'APP-2024-002');
     if (pendingApp) {
-      const pendingCommission = createCommissionFromApplication(pendingApp, new Date(Date.now() - 3 * 24 * 60 * 60 * 1000));
+      const pendingCommission = createCommissionFromApplication(pendingApp, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
       pendingCommission.status = 'commission_pending';
       commissions.push(pendingCommission);
     }
     
-    // Create an approved commission (ready for payment)
-    const approvedApp = applications.find(app => app.id === 'app-002');
+    // Create an approved commission (Sarah Chen - APP-2024-003)
+    const approvedApp = applications.find(app => app.id === 'APP-2024-003');
     if (approvedApp) {
-      const approvedCommission = createCommissionFromApplication(approvedApp, new Date(Date.now() - 2 * 24 * 60 * 60 * 1000));
+      const approvedCommission = createCommissionFromApplication(approvedApp, new Date(Date.now() - 14 * 24 * 60 * 60 * 1000));
       approvedCommission.status = 'commission_approved';
-      approvedCommission.approvedAt = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+      approvedCommission.approvedAt = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
       approvedCommission.approvedBy = 'admin@unibexs.com';
       commissions.push(approvedCommission);
     }
@@ -57,7 +57,7 @@ function initializeSampleCommissions(): void {
     commissions.forEach(comm => {
       console.log(`  - ${comm.status}: ${comm.commissionAmount.toLocaleString()} MYR (${comm.university})`);
     });
-    
+
   } catch (error) {
     console.error('Failed to initialize sample commissions:', error);
   }
@@ -73,7 +73,7 @@ export async function initializeDataV2(): Promise<void> {
     // Initialize auth users (admin and partner users are handled by AuthService)
     AuthService.forceRefreshUsers();
 
-    // Create Partner Organization
+    // Create Partner Organization (Gold tier for higher commission rates)
     const partner: Partner = {
       id: 'partner-techcorp-001',
       type: 'business',
@@ -88,316 +88,459 @@ export async function initializeDataV2(): Promise<void> {
       address: '123 Business District, Tech City, TC 12345',
       contactPerson: 'Sarah Johnson',
       registrationNumber: 'TC-EDU-2024-001',
-      totalApplications: 0,
-      successfulPlacements: 0,
-      pendingCommission: 0
+      totalApplications: 8,
+      successfulPlacements: 5,
+      pendingCommission: 0,
+      tier: 'gold'
     };
 
-    // Create Student
-    const student: Student = {
-      id: 'student-michael-001',
-      firstName: 'Michael',
-      lastName: 'Johnson',
-      email: 'michael.johnson@email.com',
-      phone: '+1-555-0199',
-      nationality: 'American',
-      passportNumber: 'US123456789',
-      applicationIds: ['APP-2024-001'], // Will link to application being created
-      createdAt: new Date().toISOString(),
-      // Legacy fields for backward compatibility
-      dateOfBirth: '1998-03-15',
-      address: '456 Student Lane, Hometown, HT 67890',
-      emergencyContact: {
-        name: 'Robert Johnson',
-        relationship: 'Father',
-        phone: '+1-555-0200',
-      },
-      academicHistory: [
-        {
-          institution: 'Hometown High School',
-          degree: 'High School Diploma',
-          startYear: 2014,
-          endYear: 2018,
-          gpa: 3.8
-        }
-      ],
-      englishProficiency: {
-        testType: 'TOEFL',
-        score: '95',
-        testDate: '2023-06-15'
-      },
-    };
-
-    // Create Application (New Application - Start of Journey)
-    const application: Application = {
-      id: 'APP-2024-001',
-      studentId: student.id,
-      partnerId: partner.id,
-      university: 'Tech University',
-      program: 'Computer Science - Bachelor',
-      intakeDate: '2024-09-01',
-      currentStage: 1,
-      currentStatus: 'new_application',
-      priority: 'medium',
-      tuitionFee: 25000,
-      nextAction: 'Admin review required',
-      nextActor: 'Admin',
-      timeline: [
-        {
-          id: 'timeline-001',
-          stage: 1,
-          status: 'new_application',
-          timestamp: new Date().toISOString(),
-          actor: 'Partner',
-          action: 'Application submitted with initial documents',
-          notes: 'Partner TechCorp submitted application for Michael Johnson - Computer Science program at Tech University'
-        }
-      ],
-      notes: 'Initial application submitted by TechCorp Education Partners. Student seeking Computer Science Bachelor degree at Tech University for Fall 2024 intake.',
-      submittedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      metadata: {
-        source: 'partner_portal',
-        referenceNumber: 'TC-APP-2024-001',
-        estimatedCommission: 2500,
-        programFee: 25000,
-        visaFeeRequired: 350
-      }
-    };
-
-    // Create Documents separately using the Document interface
-    const documents: Document[] = [
+    // Create 8 Diverse Students
+    const students: Student[] = [
+      // Stage 1 - New Application
       {
-        id: 'DOC-APP-2024-001-1',
-        applicationId: application.id,
-        stage: 1,
-        type: 'passport',
-        fileName: 'Michael_Johnson_Passport_Copy.pdf',
-        uploadedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-        uploadedBy: 'John Partner',
-        status: 'approved',
-        version: 1,
-        url: 'data:application/pdf;base64,JVBERi0xLjMKJf////8KMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvUGFnZXMKL0tpZHMgWzMgMCBSXQovQ291bnQgMQo+PgplbmRvYmoKMyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9NZWRpYUJveCBbMCAwIDYxMiA3OTJdCj4+CmVuZG9iago=',
-        size: 1024768,
-        mimeType: 'application/pdf',
-        reviewedBy: 'System Administrator',
-        reviewedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        id: 'student-michael-001',
+        firstName: 'Michael',
+        lastName: 'Johnson',
+        email: 'michael.johnson@email.com',
+        phone: '+1-555-0199',
+        nationality: 'American',
+        passportNumber: 'US123456789',
+        applicationIds: ['APP-2024-001'],
+        createdAt: new Date().toISOString(),
+        dateOfBirth: '1998-03-15',
+        address: '456 Student Lane, Hometown, HT 67890',
+        emergencyContact: {
+          name: 'Robert Johnson',
+          relationship: 'Father',
+          phone: '+1-555-0200',
+        },
+        academicHistory: [
+          {
+            institution: 'Hometown High School',
+            degree: 'High School Diploma',
+            startYear: 2014,
+            endYear: 2018,
+            gpa: 3.8
+          }
+        ],
+        englishProficiency: {
+          testType: 'TOEFL',
+          score: '95',
+          testDate: '2023-06-15'
+        },
       },
+      
+      // Stage 5 - Commission Pending
       {
-        id: 'DOC-APP-2024-001-2',
-        applicationId: application.id,
-        stage: 1,
-        type: 'academic_transcripts',
-        fileName: 'Michael_Johnson_Academic_Transcripts.pdf',
-        uploadedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-        uploadedBy: 'John Partner',
-        status: 'approved',
-        version: 1,
-        url: 'data:application/pdf;base64,JVBERi0xLjMKJf////8KMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvUGFnZXMKL0tpZHMgWzMgMCBSXQovQ291bnQgMQo+PgplbmRvYmoKMyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9NZWRpYUJveCBbMCAwIDYxMiA3OTJdCj4+CmVuZG9iago=',
-        size: 2048576,
-        mimeType: 'application/pdf',
-        reviewedBy: 'System Administrator',
-        reviewedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        id: 'student-ahmed-002',
+        firstName: 'Ahmed',
+        lastName: 'Ali',
+        email: 'ahmed.ali@email.com',
+        phone: '+249-123-456789',
+        nationality: 'Sudan',
+        passportNumber: 'SD987654321',
+        applicationIds: ['APP-2024-002'],
+        createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
+        dateOfBirth: '1999-08-20',
+        address: 'Khartoum North, Sudan',
+        emergencyContact: {
+          name: 'Hassan Ali',
+          relationship: 'Father',
+          phone: '+249-123-456700',
+        },
+        academicHistory: [
+          {
+            institution: 'Khartoum University',
+            degree: 'Bachelor of Science',
+            startYear: 2017,
+            endYear: 2021,
+            gpa: 3.6
+          }
+        ],
+        englishProficiency: {
+          testType: 'IELTS',
+          score: '7.0',
+          testDate: '2023-05-20'
+        },
       },
+      
+      // Stage 5 - Commission Approved
       {
-        id: 'DOC-APP-2024-001-3',
-        applicationId: application.id,
-        stage: 1,
-        type: 'english_test',
-        fileName: 'Michael_Johnson_TOEFL_Certificate.pdf',
-        uploadedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        uploadedBy: 'John Partner',
-        status: 'approved',
-        version: 1,
-        url: 'data:application/pdf;base64,JVBERi0xLjMKJf////8KMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvUGFnZXMKL0tpZHMgWzMgMCBSXQovQ291bnQgMQo+PgplbmRvYmoKMyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9NZWRpYUJveCBbMCAwIDYxMiA3OTJdCj4+CmVuZG9iago=',
-        size: 512384,
-        mimeType: 'application/pdf',
-        reviewedBy: 'System Administrator',
-        reviewedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        id: 'student-sarah-003',
+        firstName: 'Sarah',
+        lastName: 'Chen',
+        email: 'sarah.chen@email.com',
+        phone: '+86-138-0013-8000',
+        nationality: 'China',
+        passportNumber: 'CN456789123',
+        applicationIds: ['APP-2024-003'],
+        createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
+        dateOfBirth: '1997-12-10',
+        address: 'Beijing, China',
+        emergencyContact: {
+          name: 'Li Chen',
+          relationship: 'Mother',
+          phone: '+86-138-0013-8001',
+        },
+        academicHistory: [
+          {
+            institution: 'Beijing Institute of Technology',
+            degree: 'Bachelor of Engineering',
+            startYear: 2016,
+            endYear: 2020,
+            gpa: 3.9
+          }
+        ],
+        englishProficiency: {
+          testType: 'TOEFL',
+          score: '105',
+          testDate: '2023-04-15'
+        },
       },
+      
+      // Stage 5 - Commission Paid
       {
-        id: 'DOC-APP-2024-001-4',
-        applicationId: application.id,
-        stage: 1,
-        type: 'personal_statement',
-        fileName: 'Michael_Johnson_Personal_Statement.pdf',
-        uploadedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-        uploadedBy: 'John Partner',
-        status: 'pending',
-        version: 1,
-        url: 'data:application/pdf;base64,JVBERi0xLjMKJf////8KMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvUGFnZXMKL0tpZHMgWzMgMCBSXQovQ291bnQgMQo+PgplbmRvYmoKMyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9NZWRpYUJveCBbMCAwIDYxMiA3OTJdCj4+CmVuZG9iago=',
-        size: 768912,
-        mimeType: 'application/pdf'
+        id: 'student-omar-004',
+        firstName: 'Omar',
+        lastName: 'Hassan',
+        email: 'omar.hassan@email.com',
+        phone: '+968-9123-4567',
+        nationality: 'Oman',
+        passportNumber: 'OM789123456',
+        applicationIds: ['APP-2024-004'],
+        createdAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString(),
+        dateOfBirth: '1998-06-25',
+        address: 'Muscat, Oman',
+        emergencyContact: {
+          name: 'Fatima Hassan',
+          relationship: 'Mother',
+          phone: '+968-9123-4568',
+        },
+        academicHistory: [
+          {
+            institution: 'Sultan Qaboos University',
+            degree: 'Bachelor of Business Administration',
+            startYear: 2016,
+            endYear: 2020,
+            gpa: 3.7
+          }
+        ],
+        englishProficiency: {
+          testType: 'IELTS',
+          score: '7.5',
+          testDate: '2023-03-10'
+        },
+      },
+      
+      // Stage 4 - Enrollment/Arrival
+      {
+        id: 'student-maria-005',
+        firstName: 'Maria',
+        lastName: 'Garcia',
+        email: 'maria.garcia@email.com',
+        phone: '+34-612-345-678',
+        nationality: 'Spain',
+        passportNumber: 'ES123456789',
+        applicationIds: ['APP-2024-005'],
+        createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
+        dateOfBirth: '1999-04-18',
+        address: 'Madrid, Spain',
+        emergencyContact: {
+          name: 'Carlos Garcia',
+          relationship: 'Father',
+          phone: '+34-612-345-679',
+        },
+        academicHistory: [
+          {
+            institution: 'Universidad Complutense Madrid',
+            degree: 'Bachelor of Arts',
+            startYear: 2017,
+            endYear: 2021,
+            gpa: 3.8
+          }
+        ],
+        englishProficiency: {
+          testType: 'IELTS',
+          score: '8.0',
+          testDate: '2023-07-22'
+        },
+      },
+      
+      // Stage 3 - Visa Processing
+      {
+        id: 'student-raj-006',
+        firstName: 'Raj',
+        lastName: 'Patel',
+        email: 'raj.patel@email.com',
+        phone: '+91-98765-43210',
+        nationality: 'India',
+        passportNumber: 'IN987654321',
+        applicationIds: ['APP-2024-006'],
+        createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+        dateOfBirth: '1998-11-30',
+        address: 'Mumbai, India',
+        emergencyContact: {
+          name: 'Priya Patel',
+          relationship: 'Mother',
+          phone: '+91-98765-43211',
+        },
+        academicHistory: [
+          {
+            institution: 'Indian Institute of Technology',
+            degree: 'Bachelor of Technology',
+            startYear: 2016,
+            endYear: 2020,
+            gpa: 3.9
+          }
+        ],
+        englishProficiency: {
+          testType: 'IELTS',
+          score: '7.5',
+          testDate: '2023-08-15'
+        },
+      },
+      
+      // Stage 2 - University Review
+      {
+        id: 'student-john-007',
+        firstName: 'John',
+        lastName: 'Smith',
+        email: 'john.smith@email.com',
+        phone: '+44-7700-900123',
+        nationality: 'United Kingdom',
+        passportNumber: 'GB123456789',
+        applicationIds: ['APP-2024-007'],
+        createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+        dateOfBirth: '1999-02-14',
+        address: 'London, United Kingdom',
+        emergencyContact: {
+          name: 'Jane Smith',
+          relationship: 'Mother',
+          phone: '+44-7700-900124',
+        },
+        academicHistory: [
+          {
+            institution: 'Oxford High School',
+            degree: 'A-Levels',
+            startYear: 2015,
+            endYear: 2017,
+            gpa: 3.9
+          }
+        ],
+        englishProficiency: {
+          testType: 'IELTS',
+          score: '8.5',
+          testDate: '2023-09-10'
+        },
+      },
+      
+      // Stage 1 - Under Review
+      {
+        id: 'student-fatima-008',
+        firstName: 'Fatima',
+        lastName: 'Ahmed',
+        email: 'fatima.ahmed@email.com',
+        phone: '+249-912-345678',
+        nationality: 'Sudan',
+        passportNumber: 'SD456789123',
+        applicationIds: ['APP-2024-008'],
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        dateOfBirth: '2000-01-05',
+        address: 'Port Sudan, Sudan',
+        emergencyContact: {
+          name: 'Mohammed Ahmed',
+          relationship: 'Father',
+          phone: '+249-912-345679',
+        },
+        academicHistory: [
+          {
+            institution: 'Red Sea University',
+            degree: 'High School Certificate',
+            startYear: 2016,
+            endYear: 2018,
+            gpa: 3.7
+          }
+        ],
+        englishProficiency: {
+          testType: 'IELTS',
+          score: '6.5',
+          testDate: '2023-10-05'
+        },
       }
     ];
 
-    // Create Stage 2 Applications for Testing
-    const stage2Student: Student = {
-      id: 'student-sarah-002',
-      firstName: 'Sarah',
-      lastName: 'Williams',
-      email: 'sarah.williams@email.com',
-      phone: '+1-555-0298',
-      nationality: 'Canadian',
-      passportNumber: 'CA987654321',
-      applicationIds: ['APP-2024-002'], // Will link to application being created
-      createdAt: new Date().toISOString(),
-      // Legacy fields for backward compatibility
-      dateOfBirth: '1999-07-22',
-      address: '789 Maple Street, Toronto, ON M1A 2B3',
-      emergencyContact: {
-        name: 'Jennifer Williams',
-        relationship: 'Mother',
-        phone: '+1-555-0299',
+    // Create 8 Applications Across All Stages
+    const applications: Application[] = [
+      // APP-2024-001: Stage 1 - New Application (Michael Johnson)
+      {
+        id: 'APP-2024-001',
+        studentId: 'student-michael-001',
+        partnerId: partner.id,
+        university: 'Tech University',
+        program: 'Computer Science - Bachelor',
+        intakeDate: '2025-01-15',
+        currentStage: 1,
+        currentStatus: 'new_application',
+        priority: 'medium',
+        tuitionFee: 25000,
+        currency: 'MYR',
+        nextAction: 'Admin review required',
+        nextActor: 'Admin',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
-      academicHistory: [
-        {
-          institution: 'Toronto High School',
-          degree: 'High School Diploma',
-          startYear: 2013,
-          endYear: 2017,
-          gpa: 3.8
-        }
-      ],
-      englishProficiency: {
-        testType: 'IELTS',
-        score: '7.5',
-        testDate: '2023-11-15'
-      },
-    };
 
-    const stage2Application: Application = {
-      id: 'APP-2024-002',
-      studentId: stage2Student.id,
-      partnerId: partner.id,
-      university: 'International Business University',
-      program: 'Business Administration - Master',
-      intakeDate: '2024-09-01',
-      currentStage: 2,
-      currentStatus: 'sent_to_university',
-      priority: 'high',
-      tuitionFee: 35000,
-      nextAction: 'Waiting for university response',
-      nextActor: 'University',
-      timeline: [
-        {
-          id: 'timeline-s2-001',
-          stage: 1,
-          status: 'approved_stage1',
-          timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
-          actor: 'Admin',
-          action: 'Stage 1 approved',
-          notes: 'All documents approved, moving to Stage 2'
-        },
-        {
-          id: 'timeline-s2-002', 
-          stage: 2,
-          status: 'sent_to_university',
-          timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-          actor: 'System',
-          action: 'Application sent to university',
-          notes: 'Application package submitted to International Business University'
-        }
-      ],
-      notes: 'Strong candidate with excellent IELTS score. High priority for university.',
-      submittedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-    };
-
-    const stage2ApplicationPending: Application = {
-      id: 'APP-2024-003',
-      studentId: 'student-david-003',
-      partnerId: partner.id,
-      university: 'Science & Technology Institute',
-      program: 'Engineering - Electrical',
-      intakeDate: '2024-09-01',
-      currentStage: 2,
-      currentStatus: 'university_requested_corrections',
-      priority: 'medium',
-      tuitionFee: 28000,
-      nextAction: 'Upload requested corrections',
-      nextActor: 'Partner',
-      timeline: [
-        {
-          id: 'timeline-s2p-001',
-          stage: 1,
-          status: 'approved_stage1',
-          timestamp: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-          actor: 'Admin',
-          action: 'Stage 1 approved',
-          notes: 'Documents approved after corrections'
-        },
-        {
-          id: 'timeline-s2p-002',
-          stage: 2,
-          status: 'sent_to_university',
-          timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          actor: 'System',
-          action: 'Application sent to university',
-          notes: 'Application submitted to Science & Technology Institute'
-        },
-        {
-          id: 'timeline-s2p-003',
-          stage: 2,
-          status: 'university_requested_corrections',
-          timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          actor: 'University',
-          action: 'University requested additional documents',
-          notes: 'University requires updated academic transcripts and English test'
-        }
-      ],
-      notes: 'University requested additional information.',
-      submittedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-    };
-
-    const stage2Student3: Student = {
-      id: 'student-david-003',
-      firstName: 'David',
-      lastName: 'Chen',
-      email: 'david.chen@email.com',
-      phone: '+86-138-0013-8000',
-      nationality: 'Chinese',
-      passportNumber: 'E12345678',
-      applicationIds: [], // Will be updated when applications are linked
-      createdAt: new Date().toISOString(),
-      // Legacy fields for backward compatibility
-      dateOfBirth: '1998-12-10',
-      address: 'Room 1205, Building A, Sunshine Community, Beijing, China',
-      emergencyContact: {
-        name: 'Li Chen',
-        relationship: 'Father',
-        phone: '+86-138-0013-8001',
+      // APP-2024-002: Stage 5 - Commission Pending (Ahmed Ali - Sudan)
+      {
+        id: 'APP-2024-002',
+        studentId: 'student-ahmed-002',
+        partnerId: partner.id,
+        university: 'University of Malaya',
+        program: 'Master of Science - Data Science',
+        intakeDate: '2024-09-01',
+        currentStage: 5,
+        currentStatus: 'commission_pending',
+        priority: 'high',
+        tuitionFee: 25000,
+        currency: 'MYR',
+        nextAction: 'Commission review required',
+        nextActor: 'Admin',
+        createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
       },
-      academicHistory: [
-        {
-          institution: 'Beijing University of Technology',
-          degree: 'Bachelor of Engineering',
-          startYear: 2016,
-          endYear: 2020,
-          gpa: 3.6
-        }
-      ],
-      englishProficiency: {
-        testType: 'TOEFL',
-        score: '95',
-        testDate: '2023-10-20'
+
+      // APP-2024-003: Stage 5 - Commission Approved (Sarah Chen - China)
+      {
+        id: 'APP-2024-003',
+        studentId: 'student-sarah-003',
+        partnerId: partner.id,
+        university: 'Universiti Teknologi Malaysia',
+        program: 'Master of Engineering - Software Engineering',
+        intakeDate: '2024-07-01',
+        currentStage: 5,
+        currentStatus: 'commission_approved',
+        priority: 'high',
+        tuitionFee: 30000,
+        currency: 'MYR',
+        nextAction: 'Payment release pending',
+        nextActor: 'Admin',
+        createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       },
-    };
+
+      // APP-2024-004: Stage 5 - Commission Paid (Omar Hassan - Oman)
+      {
+        id: 'APP-2024-004',
+        studentId: 'student-omar-004',
+        partnerId: partner.id,
+        university: 'Taylor\'s University',
+        program: 'Bachelor of Business Administration',
+        intakeDate: '2024-05-01',
+        currentStage: 5,
+        currentStatus: 'commission_paid',
+        priority: 'medium',
+        tuitionFee: 35000,
+        currency: 'MYR',
+        nextAction: 'Application completed',
+        nextActor: 'Admin',
+        createdAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+
+      // APP-2024-005: Stage 4 - Enrollment Verification (Maria Garcia - Spain)
+      {
+        id: 'APP-2024-005',
+        studentId: 'student-maria-005',
+        partnerId: partner.id,
+        university: 'International Islamic University Malaysia',
+        program: 'Bachelor of Arts - International Relations',
+        intakeDate: '2024-09-01',
+        currentStage: 4,
+        currentStatus: 'enrollment_verification',
+        priority: 'high',
+        tuitionFee: 22000,
+        currency: 'MYR',
+        nextAction: 'Verify enrollment documents',
+        nextActor: 'Admin',
+        createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+
+      // APP-2024-006: Stage 3 - Visa Processing (Raj Patel - India)
+      {
+        id: 'APP-2024-006',
+        studentId: 'student-raj-006',
+        partnerId: partner.id,
+        university: 'Universiti Putra Malaysia',
+        program: 'Master of Engineering - Civil Engineering',
+        intakeDate: '2025-02-01',
+        currentStage: 3,
+        currentStatus: 'visa_submitted',
+        priority: 'medium',
+        tuitionFee: 28000,
+        currency: 'MYR',
+        nextAction: 'Await visa decision',
+        nextActor: 'Immigration',
+        createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+
+      // APP-2024-007: Stage 2 - University Review (John Smith - UK)
+      {
+        id: 'APP-2024-007',
+        studentId: 'student-john-007',
+        partnerId: partner.id,
+        university: 'Multimedia University',
+        program: 'Bachelor of Information Technology',
+        intakeDate: '2025-03-01',
+        currentStage: 2,
+        currentStatus: 'university_processing',
+        priority: 'medium',
+        tuitionFee: 26000,
+        currency: 'MYR',
+        nextAction: 'University assessment pending',
+        nextActor: 'University',
+        createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+
+      // APP-2024-008: Stage 1 - Under Review (Fatima Ahmed - Sudan)
+      {
+        id: 'APP-2024-008',
+        studentId: 'student-fatima-008',
+        partnerId: partner.id,
+        university: 'Universiti Kebangsaan Malaysia',
+        program: 'Bachelor of Medicine',
+        intakeDate: '2025-07-01',
+        currentStage: 1,
+        currentStatus: 'under_review',
+        priority: 'high',
+        tuitionFee: 45000,
+        currency: 'MYR',
+        nextAction: 'Document verification in progress',
+        nextActor: 'Admin',
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+      }
+    ];
+
+    // Simple document placeholder - focus on applications and commissions for now
+    const documents: Document[] = [];
 
     // Store all data
     StorageService.savePartner(partner);
-    StorageService.saveStudent(student);
-    StorageService.saveStudent(stage2Student);
-    StorageService.saveStudent(stage2Student3);
-    StorageService.saveApplication(application);
-    StorageService.saveApplication(stage2Application);
-    StorageService.saveApplication(stage2ApplicationPending);
     
-    // Store documents separately
+    // Save all 8 students
+    students.forEach(student => {
+      StorageService.saveStudent(student);
+    });
+    
+    // Save all 8 applications
+    applications.forEach(application => {
+      StorageService.saveApplication(application);
+    });
+    
+    // Store documents separately (empty for now - focus on core functionality)
     documents.forEach(doc => {
       StorageService.addDocument(doc);
     });
@@ -405,7 +548,8 @@ export async function initializeDataV2(): Promise<void> {
     // Update partner statistics
     const updatedPartner = {
       ...partner,
-      totalApplications: 3
+      totalApplications: 8,
+      successfulPlacements: 3  // 3 students in Stage 5
     };
     StorageService.updatePartner(updatedPartner);
 
@@ -425,28 +569,16 @@ export async function initializeDataV2(): Promise<void> {
     console.log('✅ V2 Data Initialization Complete!');
     console.log('📊 Created:');
     console.log('  - Auth Users Refreshed (Admin + Partner)');
-    console.log('  - 1 Partner Organization');
-    console.log('  - 3 Students (Michael, Sarah, David)');
-    console.log('  - 3 Applications (1 Stage 1, 2 Stage 2)');
-    console.log(`  - ${documents.length} Documents (${documents.filter(d => d.status === 'approved').length} approved, ${documents.filter(d => d.status === 'pending').length} pending)`);
-    console.log('');
-    console.log('🎯 Multi-Stage Journey Ready:');
-    console.log('  📋 Stage 1: Michael Johnson (APP-2024-001) - New Application');
-    console.log('  🏫 Stage 2: Sarah Williams (APP-2024-002) - Sent to University');  
-    console.log('  📝 Stage 2: David Chen (APP-2024-003) - University Corrections Needed');
-    console.log('');
-    console.log('🧪 Test Workflow Engine:');
-    console.log('  ✅ Zero hardcoded logic - All configuration-driven');
-    console.log('  ✅ Stage 1 & Stage 2 statuses implemented'); 
-    console.log('  ✅ Copy manager for easy text editing');
-    console.log('  ✅ Authority matrix for permissions');
-    console.log('');
-    console.log('👤 Login Credentials:');
-    console.log('  Partner: partner@unibexs.com / partner123');
-    console.log('  Admin: admin@unibexs.com / admin123');
+    console.log('  - 1 Partner Organization (Gold Tier)');
+    console.log('  - 8 Students (Diverse Nationalities)');
+    console.log('  - 8 Applications (Stage 1: 2, Stage 2: 1, Stage 3: 1, Stage 4: 1, Stage 5: 3)');
+    console.log('  - 3 Commissions (Pending: 1, Approved: 1, Paid: 1)');
+    console.log('  - Sample Universities, Services, and Logistics Partners');
+    console.log('\n🔐 Login Credentials:');
+    console.log('  - Admin: admin@unibexs.com / admin123');
+    console.log('  - Partner: partner@techcorp.com / partner123');
 
   } catch (error) {
-    console.error('❌ V2 Data Initialization Failed:', error);
-    throw error;
+    console.error('Failed to initialize V2 data:', error);
   }
 }
