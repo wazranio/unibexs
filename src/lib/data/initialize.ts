@@ -751,16 +751,7 @@ export class DataInitializationService {
             });
           }
           
-          if (application.currentStage >= 5) {
-            commissions.push({
-              id: `COM-${i + 1}`,
-              applicationId,
-              amount: Math.floor((application.tuitionFee || 0) * 0.1),
-              currency: 'USD',
-              status: 'approved',
-              approvedAt: new Date().toISOString(),
-            });
-          }
+          // Commission data is handled by initialize-v2.ts
           
           // Add comprehensive comments for testing
           comments.push(

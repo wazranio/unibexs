@@ -1,10 +1,67 @@
 import { StorageService } from './storage';
-import { Application, Student, Partner, Document } from '@/types';
+import { Application, Student, Partner, Document, Commission } from '@/types';
 import { AuthService } from '@/lib/auth';
+import { createCommissionFromApplication } from '@/lib/commission/commission-calculator';
 import { initializeSamplePartners } from './sample-partners';
 import { initializeSampleUniversities } from './sample-universities';
 import { initializeSampleServices } from './sample-services';
 import { initializeSampleLogisticsPartners } from './sample-logistics-partners';
+
+function initializeSampleCommissions(): void {
+  console.log('📊 Initializing sample commission data...');
+  
+  try {
+    // Create sample commissions for completed enrollments
+    const applications = StorageService.getApplications();
+    const commissions: Commission[] = [];
+    
+    // Create a completed commission (student enrolled and paid)
+    const completedApp = applications.find(app => app.id === 'app-003');
+    if (completedApp) {
+      const completedCommission = createCommissionFromApplication(completedApp, new Date(Date.now() - 5 * 24 * 60 * 60 * 1000));
+      completedCommission.status = 'commission_paid';
+      completedCommission.approvedAt = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
+      completedCommission.releasedAt = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+      completedCommission.paidAt = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+      completedCommission.transferReference = 'TXN20241201001';
+      completedCommission.transferDocumentUrl = 'https://example.com/transfers/receipt-001.pdf';
+      completedCommission.approvedBy = 'admin@unibexs.com';
+      completedCommission.releasedBy = 'admin@unibexs.com';
+      commissions.push(completedCommission);
+    }
+    
+    // Create a pending commission
+    const pendingApp = applications.find(app => app.id === 'app-001');
+    if (pendingApp) {
+      const pendingCommission = createCommissionFromApplication(pendingApp, new Date(Date.now() - 3 * 24 * 60 * 60 * 1000));
+      pendingCommission.status = 'commission_pending';
+      commissions.push(pendingCommission);
+    }
+    
+    // Create an approved commission (ready for payment)
+    const approvedApp = applications.find(app => app.id === 'app-002');
+    if (approvedApp) {
+      const approvedCommission = createCommissionFromApplication(approvedApp, new Date(Date.now() - 2 * 24 * 60 * 60 * 1000));
+      approvedCommission.status = 'commission_approved';
+      approvedCommission.approvedAt = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+      approvedCommission.approvedBy = 'admin@unibexs.com';
+      commissions.push(approvedCommission);
+    }
+    
+    // Save all commissions
+    commissions.forEach(commission => {
+      StorageService.saveCommission(commission);
+    });
+    
+    console.log(`💰 Created ${commissions.length} sample commissions:`);
+    commissions.forEach(comm => {
+      console.log(`  - ${comm.status}: ${comm.commissionAmount.toLocaleString()} MYR (${comm.university})`);
+    });
+    
+  } catch (error) {
+    console.error('Failed to initialize sample commissions:', error);
+  }
+}
 
 export async function initializeDataV2(): Promise<void> {
   console.log('🚀 Starting V2 Data Initialization...');
@@ -361,6 +418,9 @@ export async function initializeDataV2(): Promise<void> {
     // Initialize service providers
     initializeSampleServices();
     initializeSampleLogisticsPartners();
+
+    // Initialize sample commission data
+    initializeSampleCommissions();
 
     console.log('✅ V2 Data Initialization Complete!');
     console.log('📊 Created:');

@@ -16,6 +16,9 @@ import {
   StudentAnalytics,
   UniversityAnalytics,
   ServiceAnalytics,
+  Commission,
+  CommissionSummary,
+  CommissionPipelineStats,
 } from '@/types';
 import { SystemTriggers } from '../workflow/system-triggers';
 
@@ -746,6 +749,117 @@ export class StorageService {
       total: services.length,
       byType,
     };
+  }
+
+  // Commission Methods
+  static getCommissions(): Commission[] {
+    const data = localStorage.getItem(STORAGE_KEYS.COMMISSIONS);
+    return data ? JSON.parse(data).map((c: Commission) => ({
+      ...c,
+      enrollmentDate: new Date(c.enrollmentDate),
+      createdAt: new Date(c.createdAt),
+      approvedAt: c.approvedAt ? new Date(c.approvedAt) : undefined,
+      releasedAt: c.releasedAt ? new Date(c.releasedAt) : undefined,
+      paidAt: c.paidAt ? new Date(c.paidAt) : undefined,
+    })) : [];
+  }
+
+  static saveCommission(commission: Commission): void {
+    const commissions = this.getCommissions();
+    const existingIndex = commissions.findIndex(c => c.id === commission.id);
+    
+    if (existingIndex >= 0) {
+      commissions[existingIndex] = commission;
+    } else {
+      commissions.push(commission);
+    }
+    
+    localStorage.setItem(STORAGE_KEYS.COMMISSIONS, JSON.stringify(commissions));
+    console.log(`💰 Commission ${existingIndex >= 0 ? 'updated' : 'created'}: ${commission.id}`);
+  }
+
+  static getCommissionsByPartner(partnerId: string): Commission[] {
+    return this.getCommissions().filter(c => c.partnerId === partnerId);
+  }
+
+  static getCommissionsByStatus(status: string): Commission[] {
+    return this.getCommissions().filter(c => c.status === status);
+  }
+
+  static getCommissionSummary(partnerId?: string): CommissionSummary {
+    const commissions = partnerId 
+      ? this.getCommissionsByPartner(partnerId)
+      : this.getCommissions();
+    
+    const currentMonth = new Date();
+    currentMonth.setDate(1);
+    currentMonth.setHours(0, 0, 0, 0);
+
+    return {
+      totalEarned: commissions
+        .filter(c => c.status === 'commission_paid')
+        .reduce((sum, c) => sum + c.commissionAmount, 0),
+      
+      pendingReview: commissions
+        .filter(c => c.status === 'commission_pending')
+        .reduce((sum, c) => sum + c.commissionAmount, 0),
+      
+      awaitingPayment: commissions
+        .filter(c => c.status === 'commission_approved' || c.status === 'commission_released')
+        .reduce((sum, c) => sum + c.commissionAmount, 0),
+      
+      thisMonth: commissions
+        .filter(c => c.status === 'commission_paid' && c.paidAt && c.paidAt >= currentMonth)
+        .reduce((sum, c) => sum + c.commissionAmount, 0),
+      
+      totalStudents: new Set(commissions.map(c => c.studentId)).size,
+    };
+  }
+
+  static getCommissionPipelineStats(): CommissionPipelineStats {
+    const commissions = this.getCommissions();
+    const now = new Date();
+
+    const pending = commissions.filter(c => c.status === 'commission_pending');
+    const approved = commissions.filter(c => c.status === 'commission_approved');
+    const paid = commissions.filter(c => c.status === 'commission_paid');
+
+    const currentMonth = new Date();
+    currentMonth.setDate(1);
+    currentMonth.setHours(0, 0, 0, 0);
+
+    return {
+      pending: {
+        count: pending.length,
+        totalAmount: pending.reduce((sum, c) => sum + c.commissionAmount, 0),
+        oldestDays: pending.length > 0 
+          ? Math.max(...pending.map(c => Math.floor((now.getTime() - c.createdAt.getTime()) / (1000 * 60 * 60 * 24))))
+          : 0,
+      },
+      approved: {
+        count: approved.length,
+        totalAmount: approved.reduce((sum, c) => sum + c.commissionAmount, 0),
+        averageDaysToApprove: approved.length > 0
+          ? approved
+              .filter(c => c.approvedAt)
+              .reduce((sum, c) => sum + Math.floor((c.approvedAt!.getTime() - c.createdAt.getTime()) / (1000 * 60 * 60 * 24)), 0) / approved.length
+          : 0,
+      },
+      paid: {
+        count: paid.length,
+        totalAmount: paid.reduce((sum, c) => sum + c.commissionAmount, 0),
+        thisMonth: paid
+          .filter(c => c.paidAt && c.paidAt >= currentMonth)
+          .reduce((sum, c) => sum + c.commissionAmount, 0),
+      },
+    };
+  }
+
+  static deleteCommission(commissionId: string): void {
+    const commissions = this.getCommissions();
+    const filtered = commissions.filter(c => c.id !== commissionId);
+    localStorage.setItem(STORAGE_KEYS.COMMISSIONS, JSON.stringify(filtered));
+    console.log(`🗑️ Commission deleted: ${commissionId}`);
   }
 
   // Clear all data

@@ -588,6 +588,18 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({
       StorageService.updateApplication(updatedApp);
       console.log('[StatusUpdate] Application updated in storage:', updatedApp);
 
+      // Create commission when enrollment is completed (Stage 4 → Stage 5 transition)
+      if (pendingUpdate.status === 'enrollment_completed' && newStage === 5) {
+        try {
+          const { createCommissionFromApplication } = await import('@/lib/commission/commission-calculator');
+          const commission = createCommissionFromApplication(updatedApp, new Date());
+          StorageService.saveCommission(commission);
+          console.log(`💰 Commission created for application ${updatedApp.id}:`, commission);
+        } catch (error) {
+          console.error('Failed to create commission:', error);
+        }
+      }
+
       // Add audit log entry with new event format
       const eventName = `status.${finalStatus}`;
       const actionDescription = `Status changed from ${previousStatus} to ${finalStatus}${newStage !== application.currentStage ? ` (moved to ${getStageName(newStage)})` : ''}`;

@@ -34,6 +34,7 @@ export interface Partner {
   totalApplications?: number;
   successfulPlacements?: number;
   pendingCommission?: number;
+  tier?: 'bronze' | 'silver' | 'gold';
 }
 
 export interface Student {
@@ -105,6 +106,7 @@ export interface Application {
   university: string;
   intakeDate: string;
   tuitionFee?: number;
+  currency?: string;
   priority: 'low' | 'medium' | 'high';
   
   // Additional properties used in initialize-v2.ts
@@ -256,16 +258,6 @@ export interface ArrivalRecord {
   verifiedAt?: string;
 }
 
-export interface Commission {
-  id: string;
-  applicationId: string;
-  amount: number;
-  currency: string;
-  status: 'pending' | 'approved' | 'paid' | 'disputed';
-  approvedAt?: string;
-  paidAt?: string;
-  disputeReason?: string;
-}
 
 export interface Comment {
   id: string;
@@ -444,4 +436,88 @@ export interface UniversityAnalytics {
 export interface ServiceAnalytics {
   total: number;
   byType: Record<string, number>;
+}
+
+// Commission Module Types
+export type CommissionStatus = 
+  | 'commission_pending'     // Awaiting admin review after enrollment verified
+  | 'commission_approved'    // Admin approved, payment being processed
+  | 'commission_released'    // Admin uploaded transfer document
+  | 'commission_paid'        // Partner confirmed receipt (terminal status)
+  | 'commission_transfer_disputed'; // Partner disputed payment
+
+export interface Commission {
+  id: string;
+  applicationId: string;
+  studentId: string;
+  partnerId: string;
+  
+  // Commission Details
+  tuitionFee: number;
+  commissionRate: number;        // e.g., 0.15 for 15%
+  commissionAmount: number;      // calculated amount
+  currency: string;              // e.g., 'MYR'
+  
+  // Status & Dates
+  status: CommissionStatus;
+  enrollmentDate: Date;          // When enrollment was confirmed
+  createdAt: Date;               // When commission was created (Stage 5 start)
+  approvedAt?: Date;             // When admin approved
+  releasedAt?: Date;             // When admin uploaded transfer document
+  paidAt?: Date;                 // When partner confirmed receipt
+  
+  // Documents & Payment Info
+  transferDocumentUrl?: string;   // Admin uploaded transfer receipt
+  transferReference?: string;     // Bank transfer reference number
+  paymentNotes?: string;         // Admin notes about payment
+  
+  // Metadata
+  partnerTier: 'bronze' | 'silver' | 'gold';
+  university: string;
+  program: string;
+  
+  // Audit
+  approvedBy?: string;           // Admin who approved
+  releasedBy?: string;           // Admin who released payment
+}
+
+export interface CommissionCalculationConfig {
+  tiers: {
+    bronze: { rate: number; minimumStudents: number };
+    silver: { rate: number; minimumStudents: number };
+    gold: { rate: number; minimumStudents: number };
+  };
+  specialRates?: {
+    byUniversity?: Record<string, number>;
+    byProgram?: Record<string, number>;
+    byCountry?: Record<string, number>;
+  };
+  processingFee?: number;        // Flat fee or percentage
+  taxRate?: number;              // Tax percentage if applicable
+}
+
+export interface CommissionSummary {
+  totalEarned: number;           // All commission_paid
+  pendingReview: number;         // commission_pending
+  awaitingPayment: number;       // commission_approved + commission_released  
+  thisMonth: number;             // Paid this month
+  totalStudents: number;         // Count of students with commissions
+}
+
+export interface CommissionPipelineStats {
+  pending: {
+    count: number;
+    totalAmount: number;
+    oldestDays: number;
+  };
+  approved: {
+    count: number;
+    totalAmount: number;
+    averageDaysToApprove: number;
+  };
+  paid: {
+    count: number;
+    totalAmount: number;
+    thisMonth: number;
+  };
 }

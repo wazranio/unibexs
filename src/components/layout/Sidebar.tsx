@@ -16,6 +16,7 @@ import {
   Building,
   BookOpen,
   Truck,
+  DollarSign,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -58,6 +59,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
       href: '/admin/logistics-partners',
       icon: Truck,
     },
+    {
+      name: 'Commission',
+      href: '/admin/commission',
+      icon: DollarSign,
+    },
   ];
 
   const partnerMenuItems = [
@@ -75,6 +81,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isAdmin }) => {
       name: 'Knowledge Hub',
       href: '/knowledge-hub',
       icon: BookOpen,
+    },
+    {
+      name: 'Commission',
+      href: '/partner/commission',
+      icon: DollarSign,
     },
     {
       name: 'Logistics Partners',
