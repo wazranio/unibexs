@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Commission, CommissionSummary } from '@/types';
 import { StorageService } from '@/lib/data/storage';
 import { AuthService } from '@/lib/auth';
@@ -32,8 +32,9 @@ export default function PartnerCommissionPage() {
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [selectedCommission, setSelectedCommission] = useState<Commission | null>(null);
 
-  const currentUser = AuthService.getCurrentUser();
-  const isAdmin = AuthService.isAdmin();
+  // Memoize user context to prevent infinite loops
+  const currentUser = useMemo(() => AuthService.getCurrentUser(), []);
+  const isAdmin = useMemo(() => AuthService.isAdmin(), []);
 
   const loadData = useCallback(() => {
     try {
@@ -43,8 +44,8 @@ export default function PartnerCommissionPage() {
         throw new Error('No current user');
       }
 
-      // For partners, only show their own commissions
-      const partnerId = isAdmin ? undefined : currentUser.id;
+      // For partners, only show their own commissions using the partnerId field
+      const partnerId = isAdmin ? undefined : currentUser.partnerId;
       const partnerCommissions = partnerId 
         ? StorageService.getCommissionsByPartner(partnerId)
         : StorageService.getCommissions();
@@ -58,11 +59,11 @@ export default function PartnerCommissionPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, isAdmin]);
+  }, [currentUser, isAdmin]); // Include dependencies to satisfy ESLint
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, [loadData]); // Include loadData dependency
 
   const filteredCommissions = commissions.filter(commission => {
     if (selectedStatus !== 'all' && commission.status !== selectedStatus) {
