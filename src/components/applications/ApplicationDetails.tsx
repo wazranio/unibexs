@@ -863,7 +863,7 @@ const ApplicationDetails: React.FC<ApplicationDetailsProps> = ({
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">Comments & Notes</h3>
-                  <span className="text-sm text-gray-500">{comments.length} comment{comments.length !== 1 ? 's' : ''}</span>
+                  <span className="text-sm text-gray-500">{comments.length} comment{comments.length !== 1 ? "s" : ""}</span>
                 </div>
                 
                 {/* Add Comment Form */}

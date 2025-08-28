@@ -221,7 +221,7 @@ const PartnerDashboard = () => {
                 <div className="flex items-center">
                   <AlertCircle className="w-5 h-5 text-orange-400 mr-2" />
                   <h3 className="text-lg font-semibold text-orange-300">
-                    You have {pendingActions.length} application{pendingActions.length !== 1 ? 's' : ''} requiring action
+                    You have {pendingActions.length} application{pendingActions.length !== 1 ? "s" : ""} requiring action
                   </h3>
                 </div>
                 <p className="text-orange-400 mt-1">Please review and take necessary actions to keep applications moving forward.</p>

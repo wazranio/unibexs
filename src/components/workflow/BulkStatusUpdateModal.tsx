@@ -120,7 +120,7 @@ const BulkStatusUpdateModal: React.FC<BulkStatusUpdateModalProps> = ({
             <div>
               <h2 className="text-xl font-semibold text-gray-900">Bulk Status Update</h2>
               <p className="text-sm text-gray-600">
-                Update {selectedApplications.length} selected application{selectedApplications.length !== 1 ? 's' : ''}
+                Update {selectedApplications.length} selected application{selectedApplications.length !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
@@ -223,7 +223,7 @@ const BulkStatusUpdateModal: React.FC<BulkStatusUpdateModalProps> = ({
                 <h4 className="font-medium text-blue-800">Update Preview</h4>
               </div>
               <div className="text-sm text-blue-700">
-                {selectedApplications.length} application{selectedApplications.length !== 1 ? 's' : ''} will be updated:
+                {selectedApplications.length} application{selectedApplications.length !== 1 ? "s" : ""} will be updated:
                 {newStage && <div>• Stage → {WorkflowService.getStageName(parseInt(newStage))}</div>}
                 {newStatus && <div>• Status → {allStatuses[newStatus]}</div>}
               </div>

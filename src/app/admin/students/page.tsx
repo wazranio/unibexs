@@ -427,7 +427,7 @@ const StudentsPage: React.FC = () => {
                           </td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getApplicationCountBadge(applicationCount)}`}>
-                              {applicationCount} application{applicationCount !== 1 ? 's' : ''}
+                              {applicationCount} application{applicationCount !== 1 ? "s" : ""}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-400">

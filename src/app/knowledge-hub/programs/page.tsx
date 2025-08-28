@@ -294,7 +294,7 @@ export default function ProgramsPage() {
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium text-white">Available Programs</h3>
                     <p className="text-sm text-gray-300">
-                      {filteredPrograms.length} program{filteredPrograms.length !== 1 ? 's' : ''} found
+                      {filteredPrograms.length} program{filteredPrograms.length !== 1 ? "s" : ""} found
                     </p>
                   </div>
                 </div>

@@ -141,7 +141,7 @@ const CommentThread: React.FC<CommentThreadProps> = ({
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Comments</h2>
-            <p className="text-sm text-gray-600">{comments.length} comment{comments.length !== 1 ? 's' : ''}</p>
+            <p className="text-sm text-gray-600">{comments.length} comment{comments.length !== 1 ? "s" : ""}</p>
           </div>
         </div>
         <button

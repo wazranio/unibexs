@@ -929,7 +929,7 @@ const DocumentModule: React.FC<DocumentModuleProps> = ({ application, isAdmin, o
                 onChange={(e) => setResubmissionReason(e.target.value)}
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                placeholder="e.g., 'This passport scan is unclear, please provide a high-quality scan' or 'Document is expired, please upload current version'"
+                placeholder="e.g., &apos;This passport scan is unclear, please provide a high-quality scan&apos; or &apos;Document is expired, please upload current version&apos;"
               />
               <div className="flex space-x-3 mt-4">
                 <button
@@ -1170,7 +1170,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
                     onChange={(e) => setReviewReason(e.target.value)}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder={reviewDecision === 'rejected' ? "Provide clear reason for rejection..." : "e.g., 'This passport scan is unclear, please provide a high-quality scan'"}
+                    placeholder={reviewDecision === 'rejected' ? "Provide clear reason for rejection..." : "e.g., &apos;This passport scan is unclear, please provide a high-quality scan&apos;"}
                   />
                 </div>
               )}
@@ -1201,7 +1201,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
           <div className="mt-3 pt-3 border-t border-gray-200">
             <button className="text-sm text-blue-600 hover:text-blue-800 flex items-center">
               <Clock className="w-4 h-4 mr-1" />
-              View {document.previousVersions.length} previous version{document.previousVersions.length > 1 ? 's' : ''}
+              View {document.previousVersions.length} previous version{document.previousVersions.length > 1 ? "s" : ""}
             </button>
           </div>
         )}
