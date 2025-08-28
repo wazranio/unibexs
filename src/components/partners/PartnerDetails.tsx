@@ -492,28 +492,28 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partner }) => {
                     <Building2 className="w-5 h-5 text-gray-400 mr-3" />
                     <div>
                       <p className="text-sm text-gray-400">Business Name</p>
-                      <p className="text-white">{partner.businessName || 'N/A'}</p>
+                      <p className="text-white">{partner.businessName || "N/A"}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <FileText className="w-5 h-5 text-gray-400 mr-3" />
                     <div>
                       <p className="text-sm text-gray-400">Registration Number</p>
-                      <p className="text-white">{partner.registrationNumber || 'N/A'}</p>
+                      <p className="text-white">{partner.registrationNumber || "N/A"}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <User className="w-5 h-5 text-gray-400 mr-3" />
                     <div>
                       <p className="text-sm text-gray-400">Contact Person</p>
-                      <p className="text-white">{partner.contactPerson || 'N/A'}</p>
+                      <p className="text-white">{partner.contactPerson || "N/A"}</p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <Home className="w-5 h-5 text-gray-400 mr-3" />
                     <div>
                       <p className="text-sm text-gray-400">Business Address</p>
-                      <p className="text-white">{partner.address || 'N/A'}</p>
+                      <p className="text-white">{partner.address || "N/A"}</p>
                     </div>
                   </div>
                 </div>
@@ -590,7 +590,7 @@ const PartnerDetails: React.FC<PartnerDetailsProps> = ({ partner }) => {
                           <div className="flex items-center justify-between">
                             <div>
                               <h4 className="text-white font-medium">
-                                {student ? `${student.firstName} ${student.lastName}` : 'Unknown Student'}
+                                {student ? `${student.firstName} ${student.lastName}` : "Unknown Student"}
                               </h4>
                               <p className="text-sm text-gray-300">{application.program}</p>
                               <p className="text-sm text-gray-400">{application.university}</p>
