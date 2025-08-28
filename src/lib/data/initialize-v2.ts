@@ -6,6 +6,7 @@ import { initializeSamplePartners } from './sample-partners';
 import { initializeSampleUniversities } from './sample-universities';
 import { initializeSampleServices } from './sample-services';
 import { initializeSampleLogisticsPartners } from './sample-logistics-partners';
+import { initializeEnhancedProgramData } from './enhanced-program-data';
 
 function initializeSampleCommissions(): void {
   console.log('📊 Initializing sample commission data...');
@@ -559,6 +560,9 @@ export async function initializeDataV2(): Promise<void> {
     // Initialize universities and programs
     initializeSampleUniversities();
 
+    // Initialize enhanced program management data
+    initializeEnhancedProgramData();
+
     // Initialize service providers
     initializeSampleServices();
     initializeSampleLogisticsPartners();
@@ -574,6 +578,7 @@ export async function initializeDataV2(): Promise<void> {
     console.log('  - 8 Applications (Stage 1: 2, Stage 2: 1, Stage 3: 1, Stage 4: 1, Stage 5: 3)');
     console.log('  - 3 Commissions (Pending: 1, Approved: 1, Paid: 1)');
     console.log('  - Sample Universities, Services, and Logistics Partners');
+    console.log('  - Enhanced Program Management: Fields of Study, Levels, Enhanced Programs');
     console.log('\n🔐 Login Credentials:');
     console.log('  - Admin: admin@unibexs.com / admin123');
     console.log('  - Partner: partner@techcorp.com / partner123');

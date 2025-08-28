@@ -387,6 +387,75 @@ export interface Program {
   createdAt: string;
 }
 
+// Enhanced Program Management with Field of Study and Level Support
+
+export interface FieldOfStudy {
+  id: string;
+  name: string;
+  code: string; // Based on ISCED-F simplified
+  keywords: string[]; // For search matching
+  icon: string; // Emoji or icon identifier
+  description?: string;
+  subcategories?: string[]; // Related specializations
+  createdAt: string;
+}
+
+export interface Level {
+  id: string;
+  universityId: string;
+  collegeId: string;
+  name: 'Bachelor' | 'Master' | 'PhD' | 'Foundation' | 'Diploma' | 'Certificate';
+  displayName: string; // E.g., "Bachelor's Degree", "Master's Degree"
+  
+  // Default values that can be inherited by programs
+  defaultDuration?: string;
+  defaultCommissionRate?: number; // Percentage (0.15 = 15%)
+  defaultEnglishRequirements?: EnglishRequirements;
+  
+  // Metadata
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EnglishRequirements {
+  ielts?: number;
+  toefl?: number;
+  pte?: number;
+  duolingo?: number;
+  other?: {
+    testName: string;
+    minScore: number | string;
+  };
+}
+
+export interface EnhancedProgram extends Program {
+  levelId: string;
+  fieldOfStudyId: string;
+  
+  // Override inherited values from Level if needed
+  englishRequirements?: EnglishRequirements;
+  commissionRate?: number; // Override level default
+  
+  // Enhanced search and categorization
+  searchKeywords: string[]; // Additional keywords for better search
+  programCode?: string; // Internal program code
+  isActive: boolean; // Enable/disable programs
+  
+  // Display enhancements
+  shortDescription?: string;
+  highlights?: string[]; // Key selling points
+  
+  // Inheritance flags
+  inheritsFromLevel: {
+    duration: boolean;
+    commission: boolean;
+    englishRequirements: boolean;
+  };
+  
+  updatedAt: string;
+}
+
 export interface LogisticsPartner {
   id: string;
   name: string;

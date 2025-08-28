@@ -10,6 +10,9 @@ import {
   University,
   College,
   Program,
+  Level,
+  FieldOfStudy,
+  EnhancedProgram,
   ServiceProvider,
   LogisticsPartner,
   PartnerAnalytics,
@@ -38,6 +41,9 @@ const STORAGE_KEYS = {
   UNIVERSITIES: 'unibexs_universities',
   COLLEGES: 'unibexs_colleges',
   PROGRAMS: 'unibexs_programs',
+  LEVELS: 'unibexs_levels',
+  FIELDS_OF_STUDY: 'unibexs_fields_of_study',
+  ENHANCED_PROGRAMS: 'unibexs_enhanced_programs',
   SERVICES: 'unibexs_services',
   LOGISTICS_PARTNERS: 'unibexs_logistics_partners',
 } as const;
@@ -629,6 +635,207 @@ export class StorageService {
         program.intakes.some(intake => intake.toLowerCase().includes(searchTerm))
       );
     });
+  }
+
+  // Levels
+  static getLevels(universityId?: string, collegeId?: string): Level[] {
+    const levels = this.getItem<Level>(STORAGE_KEYS.LEVELS);
+    if (universityId && collegeId) {
+      return levels.filter(l => l.universityId === universityId && l.collegeId === collegeId);
+    } else if (universityId) {
+      return levels.filter(l => l.universityId === universityId);
+    }
+    return levels;
+  }
+
+  static getLevel(id: string): Level | undefined {
+    const levels = this.getLevels();
+    return levels.find(level => level.id === id);
+  }
+
+  static saveLevel(level: Level): void {
+    const levels = this.getLevels();
+    levels.push(level);
+    this.setItem(STORAGE_KEYS.LEVELS, levels);
+  }
+
+  static updateLevel(level: Level): void {
+    const levels = this.getLevels();
+    const index = levels.findIndex(l => l.id === level.id);
+    if (index >= 0) {
+      levels[index] = { ...level, updatedAt: new Date().toISOString() };
+      this.setItem(STORAGE_KEYS.LEVELS, levels);
+    }
+  }
+
+  static deleteLevel(id: string): void {
+    const levels = this.getLevels();
+    const filtered = levels.filter(l => l.id !== id);
+    this.setItem(STORAGE_KEYS.LEVELS, filtered);
+    
+    // Also delete related enhanced programs
+    const enhancedPrograms = this.getEnhancedPrograms().filter(p => p.levelId !== id);
+    this.setItem(STORAGE_KEYS.ENHANCED_PROGRAMS, enhancedPrograms);
+  }
+
+  // Fields of Study
+  static getFieldsOfStudy(): FieldOfStudy[] {
+    return this.getItem<FieldOfStudy>(STORAGE_KEYS.FIELDS_OF_STUDY);
+  }
+
+  static getFieldOfStudy(id: string): FieldOfStudy | undefined {
+    const fields = this.getFieldsOfStudy();
+    return fields.find(field => field.id === id);
+  }
+
+  static saveFieldOfStudy(field: FieldOfStudy): void {
+    const fields = this.getFieldsOfStudy();
+    fields.push(field);
+    this.setItem(STORAGE_KEYS.FIELDS_OF_STUDY, fields);
+  }
+
+  static updateFieldOfStudy(field: FieldOfStudy): void {
+    const fields = this.getFieldsOfStudy();
+    const index = fields.findIndex(f => f.id === field.id);
+    if (index >= 0) {
+      fields[index] = field;
+      this.setItem(STORAGE_KEYS.FIELDS_OF_STUDY, fields);
+    }
+  }
+
+  static deleteFieldOfStudy(id: string): void {
+    const fields = this.getFieldsOfStudy();
+    const filtered = fields.filter(f => f.id !== id);
+    this.setItem(STORAGE_KEYS.FIELDS_OF_STUDY, filtered);
+  }
+
+  // Enhanced Programs
+  static getEnhancedPrograms(filters?: {
+    universityId?: string;
+    collegeId?: string;
+    levelId?: string;
+    fieldOfStudyId?: string;
+    isActive?: boolean;
+  }): EnhancedProgram[] {
+    const programs = this.getItem<EnhancedProgram>(STORAGE_KEYS.ENHANCED_PROGRAMS);
+    
+    if (!filters) return programs;
+    
+    return programs.filter(program => {
+      if (filters.universityId && program.universityId !== filters.universityId) return false;
+      if (filters.collegeId && program.collegeId !== filters.collegeId) return false;
+      if (filters.levelId && program.levelId !== filters.levelId) return false;
+      if (filters.fieldOfStudyId && program.fieldOfStudyId !== filters.fieldOfStudyId) return false;
+      if (filters.isActive !== undefined && program.isActive !== filters.isActive) return false;
+      return true;
+    });
+  }
+
+  static getEnhancedProgram(id: string): EnhancedProgram | undefined {
+    const programs = this.getEnhancedPrograms();
+    return programs.find(program => program.id === id);
+  }
+
+  static saveEnhancedProgram(program: EnhancedProgram): void {
+    const programs = this.getEnhancedPrograms();
+    programs.push(program);
+    this.setItem(STORAGE_KEYS.ENHANCED_PROGRAMS, programs);
+  }
+
+  static updateEnhancedProgram(program: EnhancedProgram): void {
+    const programs = this.getEnhancedPrograms();
+    const index = programs.findIndex(p => p.id === program.id);
+    if (index >= 0) {
+      programs[index] = { ...program, updatedAt: new Date().toISOString() };
+      this.setItem(STORAGE_KEYS.ENHANCED_PROGRAMS, programs);
+    }
+  }
+
+  static deleteEnhancedProgram(id: string): void {
+    const programs = this.getEnhancedPrograms();
+    const filtered = programs.filter(p => p.id !== id);
+    this.setItem(STORAGE_KEYS.ENHANCED_PROGRAMS, filtered);
+  }
+
+  static searchEnhancedPrograms(query: string, filters?: {
+    fieldOfStudyIds?: string[];
+    levelIds?: string[];
+    universityIds?: string[];
+    countries?: string[];
+    intakes?: string[];
+    minFees?: number;
+    maxFees?: number;
+  }): EnhancedProgram[] {
+    let programs = this.getEnhancedPrograms({ isActive: true });
+    
+    // Apply filters first
+    if (filters) {
+      if (filters.fieldOfStudyIds?.length) {
+        programs = programs.filter(p => filters.fieldOfStudyIds!.includes(p.fieldOfStudyId));
+      }
+      if (filters.levelIds?.length) {
+        programs = programs.filter(p => filters.levelIds!.includes(p.levelId));
+      }
+      if (filters.universityIds?.length) {
+        programs = programs.filter(p => filters.universityIds!.includes(p.universityId));
+      }
+      if (filters.minFees !== undefined) {
+        programs = programs.filter(p => p.fees >= filters.minFees!);
+      }
+      if (filters.maxFees !== undefined) {
+        programs = programs.filter(p => p.fees <= filters.maxFees!);
+      }
+      if (filters.intakes?.length) {
+        programs = programs.filter(p => 
+          p.intakes.some(intake => filters.intakes!.includes(intake))
+        );
+      }
+      if (filters.countries?.length) {
+        const universities = this.getUniversities();
+        programs = programs.filter(p => {
+          const university = universities.find(u => u.id === p.universityId);
+          return filters.countries!.includes(university?.country || '');
+        });
+      }
+    }
+
+    // Apply text search
+    if (!query.trim()) return programs;
+    
+    const searchTerm = query.toLowerCase();
+    const universities = this.getUniversities();
+    const colleges = this.getColleges();
+    const fieldsOfStudy = this.getFieldsOfStudy();
+    
+    return programs.filter(program => {
+      const university = universities.find(u => u.id === program.universityId);
+      const college = colleges.find(c => c.id === program.collegeId);
+      const fieldOfStudy = fieldsOfStudy.find(f => f.id === program.fieldOfStudyId);
+      
+      return (
+        program.name.toLowerCase().includes(searchTerm) ||
+        program.shortDescription?.toLowerCase().includes(searchTerm) ||
+        university?.name.toLowerCase().includes(searchTerm) ||
+        college?.name.toLowerCase().includes(searchTerm) ||
+        fieldOfStudy?.name.toLowerCase().includes(searchTerm) ||
+        fieldOfStudy?.keywords.some(keyword => keyword.includes(searchTerm)) ||
+        program.searchKeywords.some(keyword => keyword.includes(searchTerm)) ||
+        program.duration.toLowerCase().includes(searchTerm) ||
+        program.requirements?.some(req => req.toLowerCase().includes(searchTerm)) ||
+        program.intakes.some(intake => intake.toLowerCase().includes(searchTerm))
+      );
+    });
+  }
+
+  static bulkUpdateEnhancedPrograms(programIds: string[], updates: Partial<EnhancedProgram>): void {
+    const programs = this.getEnhancedPrograms();
+    const updatedPrograms = programs.map(program => {
+      if (programIds.includes(program.id)) {
+        return { ...program, ...updates, updatedAt: new Date().toISOString() };
+      }
+      return program;
+    });
+    this.setItem(STORAGE_KEYS.ENHANCED_PROGRAMS, updatedPrograms);
   }
 
   // Service Providers
